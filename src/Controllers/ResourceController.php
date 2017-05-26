@@ -16,13 +16,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 trait ResourceController{
     /**
-     * 模型命名空间
-     * @var string
-     */
-    protected $modelNamespace = 'App\\Models\\';
-
-
-    /**
      * 绑定模型
      * @var
      */
@@ -147,6 +140,8 @@ trait ResourceController{
 
     /**
      * 获取字段默认值
+     * @param $model_name
+     * @return \stdClass
      */
     protected function getDefault($model_name){
         $model = $this->modelNamespace.$model_name;
@@ -170,10 +165,21 @@ trait ResourceController{
      */
     protected function bindModel(){
         if(!$this->bindModel){
-            $resourceModel = $this->modelNamespace.$this->getResourceModel();
+            $resourceModel = $this->getModelNamespace().$this->getResourceModel();
             $this->bindModel = new $resourceModel();
         }
         return $this->bindModel;
+    }
+
+    /**
+     * 设置模型的命名空间
+     * @return mixed
+     */
+    protected function getModelNamespace(){
+        if(!isset($this->modelNamespace)){
+            $this->modelNamespace = 'App\\Models\\';
+        }
+        return $this->modelNamespace;
     }
 
     /**

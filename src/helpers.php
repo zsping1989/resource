@@ -103,6 +103,37 @@ function createEditRoute($route){
     \Illuminate\Support\Facades\Route::post($route.'/{id?}', $class.'Controller@post'.$method);
 }
 
+/**
+ * 前端弹窗参数返回
+ * @param array $data
+ * @param int $status
+ * @return array
+ */
+function alert($data = [],$status=200){
+    //默认值
+    $defult  = [
+        200=>[
+            'showClose'=> true, //显示关闭按钮
+            'message'=> '操作成功!', //消息内容
+            'type'=>'success', //消息类型
+            'iconClass'=>'', //图标
+            'customClass'=>'', //自定义样式
+            'duration'=>3000, //显示时间毫秒
+            'show'=>true //是否自动弹出
+        ],
+        'other'=>[
+            'showClose'=> true, //显示关闭按钮
+            'message'=> '操作失败!', //消息内容
+            'type'=>'error', //消息类型
+            'iconClass'=>'', //图标
+            'customClass'=>'', //自定义样式
+            'duration'=>3000, //显示时间毫秒
+            'show'=>true //是否自动弹出
+        ]
+    ];
+    return collect(isset($defult[$status]) ? $defult[$status] : $defult['other'])->merge($data)->toArray();
+}
+
 
 
 
