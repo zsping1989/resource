@@ -53,7 +53,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
             return new CustomValidator($translator, $data, $rules, $messages);
         });
 
-        //注册命令
+        //注册创建代码命令
         if ($this->app->runningInConsole()) {
             $this->commands([
                 'Resource\Commands\CreateController',
@@ -66,6 +66,19 @@ class ResourceMacroServiceProvider extends ServiceProvider
                 'Resource\Commands\ExportSeed',
             ]);
         }
+
+        //去掉为空数据
+        $rquestObj = app('request');
+        $rquest = collect($rquestObj->except(['order','where']))->filter(function($item,$key)use($rquestObj){
+            if(is_null($item)){
+                $rquestObj->offsetUnset($key);
+            }
+            return !is_null($item);
+        })->toArray();
+        //处理关系模型数据
+        collect(getRelationData($rquest))->map(function($item,$key)use($rquestObj){
+            $rquestObj->offsetSet($key,$item);
+        });
     }
 
     /**

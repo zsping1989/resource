@@ -134,6 +134,34 @@ function alert($data = [],$status=200){
     return collect(isset($defult[$status]) ? $defult[$status] : $defult['other'])->merge($data)->toArray();
 }
 
+/**
+ * 关系数据处理
+ * @param $data
+ * @param array $result
+ * @return array
+ */
+function getRelationData($data,&$result = []){
+    if (!is_array($data)) {
+        return $data;
+    }else{
+        collect($data)->map(function($item,$k)use(&$result){
+            if(str_contains($k,'.')){
+                $keys = explode('.',$k);
+                $first = $keys[0];
+                unset($keys[0]);
+                $result[$first][implode('.',$keys)] = $item;
+            }else{
+                $result[$k] = $item;
+            }
+        });
+        foreach($result as $key=>$value){
+            if(is_array($value)){
+                $result[$key] = getRelationData($value);
+            }
+        }
+    }
+    return $result;
+}
 
 
 
