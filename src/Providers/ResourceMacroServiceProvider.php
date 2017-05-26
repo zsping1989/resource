@@ -52,6 +52,20 @@ class ResourceMacroServiceProvider extends ServiceProvider
         {
             return new CustomValidator($translator, $data, $rules, $messages);
         });
+
+        //注册命令
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                'Resource\Commands\CreateController',
+                'Resource\Commands\CreateModel',
+                'Resource\Commands\CreateMigration',
+                'Resource\Commands\CreateSeed',
+                'Resource\Commands\CreateView',
+                'Resource\Commands\ExportModel',
+                'Resource\Commands\ExportMigration',
+                'Resource\Commands\ExportSeed',
+            ]);
+        }
     }
 
     /**
