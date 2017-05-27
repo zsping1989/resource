@@ -79,6 +79,15 @@ class ResourceMacroServiceProvider extends ServiceProvider
         collect(getRelationData($rquest))->map(function($item,$key)use($rquestObj){
             $rquestObj->offsetSet($key,$item);
         });
+
+        //需要生成的迁徙文件
+        $this->publishes([
+            __DIR__.'/../Publishes/database/migrations' => database_path('migrations')
+        ], 'migrations');
+        //需要生成的数据填充
+        $this->publishes([
+            __DIR__.'/../Publishes/database/seeds' => database_path('seeds')
+        ], 'seeds');
     }
 
     /**
