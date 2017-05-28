@@ -3,7 +3,7 @@
  * {{$table_comment}}模型
  */
 namespace {{$namespace}};
-use App\BaseModel;
+use Resource\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 @if ($tree)
 use MarginTree\TreeModel;
@@ -14,10 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class {{$name}} extends Model
 {
-    protected $table = '{{$table}}'; //数据表名称
-@if($connection)
-    protected $connection = '{{$connection}}'; //数据库连接
-@endif
+
     use BaseModel; //基础模型
 @if ($tree)
     use TreeModel; //树状结构
@@ -26,6 +23,10 @@ class {{$name}} extends Model
     use SoftDeletes; //软删除
 @endif
 
+    protected $table = '{{$table}}'; //数据表名称
+@if($connection)
+    protected $connection = '{{$connection}}'; //数据库连接
+@endif
     //批量赋值白名单
     protected $fillable = [{!! $fillable !!}];
     //输出隐藏字段

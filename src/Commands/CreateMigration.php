@@ -12,7 +12,7 @@ class CreateMigration extends BaseCreate
      *
      * @var string
      */
-    protected $signature = 'create:migration {model}';
+    protected $signature = 'create:migration {model} {--namespace}';
 
     /**
      * The console command description.
@@ -67,7 +67,12 @@ class CreateMigration extends BaseCreate
      * 创建迁徙文件
      */
     protected function readyDatas(){
-        $model = 'App\\'.str_replace('/','\\',$this->argument('model'));
+        $data['model_namespace'] = false;
+        if($this->option('namespace')){
+            $model = str_replace('/','\\',$this->argument('model'));
+        }else{
+            $model = 'App\\'.str_replace('/','\\',$this->argument('model'));
+        }
         $this->bindModel = new $model();
         $data['php'] = '<?php';
         $data['model'] = $model;

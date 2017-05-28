@@ -51,12 +51,12 @@ trait CommonController{
     protected $showPrefixions = [];
 
     /**
+     * 获取关联关系表字段备注信息
      * @param $fields
      * @param Model $model
      * @param array $result
      * @param string $pfix_key
      * @return array
-     * 获取关联关系表字段备注信息
      */
     protected function relationTables($fields,Model $model,&$result=[],$pfix_key=''){
         $result = $this->jointTitle($model,collect($this->showPrefixions)->get($pfix_key)); //字段说明值

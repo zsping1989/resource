@@ -2,8 +2,6 @@
 
 namespace Resource\Commands;
 
-
-
 use Resource\Commands\Bases\BaseCreate;
 
 class CreateView extends BaseCreate
@@ -13,7 +11,7 @@ class CreateView extends BaseCreate
      *
      * @var string
      */
-    protected $signature = 'create:view {model}';
+    protected $signature = 'create:view {model} {template} {output?} {--namespace}';
 
     /**
      * The console command description.
@@ -31,15 +29,28 @@ class CreateView extends BaseCreate
      */
     protected $bindModel;
 
+    /**
+     * 生成代码输出位置
+     */
     protected function getOutputPath(){
-        $this->outputPath = resource_path('views/admin/order/Edit');
+        if($this->argument('output')){
+            $this->outputPath = resource_path('views/'.$this->argument('output'));
+        }else{
+            $this->outputPath = resource_path('views/admin/'.snake_case(basename($this->argument('model'))).'/'.studly_case($this->argument('template')));
+        }
     }
 
     /**
      * 创建控制器
      */
     protected function readyDatas(){
-        $model = 'App\\'.str_replace('/','\\',$this->argument('model'));
+        $this->tpl = 'html/'.$this->argument('template');
+        $data['model_namespace'] = false;
+        if($this->option('namespace')){
+            $model = str_replace('/','\\',$this->argument('model'));
+        }else{
+            $model = 'App\\'.str_replace('/','\\',$this->argument('model'));
+        }
         $this->bindModel = new $model();
         $data = $this->bindModel->getTableInfo();
         $data['path'] = str_singular($this->bindModel->getTable());

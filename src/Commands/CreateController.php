@@ -13,7 +13,7 @@ class CreateController extends BaseCreate
      *
      * @var string
      */
-    protected $signature = 'create:controller {name} {model?}';
+    protected $signature = 'create:controller {name} {model?} {--namespace}';
 
     /**
      * The console command description.
@@ -86,7 +86,13 @@ class CreateController extends BaseCreate
         $data['name'] = basename($name); //控制器名称
         $data['model'] = str_replace('/','\\',$this->argument('model')) ?: $this->defaultModel(); //绑定模型名称
         $data['modelName'] = basename($data['model']); //模型名字
-        $modelName = '\\App\\'.$data['model'];
+        $data['model_namespace'] = false;
+        if($this->option('namespace')){
+            $data['model_namespace'] = str_replace('/','\\\\',dirname($this->argument('model'))).'\\\\';
+            $modelName = '\\'.$data['model'];
+        }else{
+            $modelName = '\\App\\'.$data['model'];
+        }
         $model = new $modelName();
         $data['tableInfo'] = $this->getTableInfo($model); //数据表信息
         $data['validates'] = collect($data['tableInfo']['table_fields'])->map(function($item){
