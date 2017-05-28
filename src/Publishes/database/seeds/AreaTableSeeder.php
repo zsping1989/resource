@@ -4,7 +4,7 @@ use Illuminate\Database\Seeder;
 
 class AreaTableSeeder extends Seeder
 {
-    protected $bindModel='App\Models\Area';
+    protected $bindModel='Resource\Models\Area';
     /**
      * Run the database seeds.
      *

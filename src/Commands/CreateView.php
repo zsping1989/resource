@@ -23,7 +23,7 @@ class CreateView extends BaseCreate
     protected $description = '自定义模板视图生成';
 
     protected $type='vue';
-    protected $tpl = 'create/edit';
+    protected $tpl = 'html/edit';
     protected $baseNamespace = '';
     /**
      * 绑定模型

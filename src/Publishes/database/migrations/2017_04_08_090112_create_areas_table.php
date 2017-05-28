@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 class CreateAreasTable extends Migration
 {
 
-    protected $bindModel='App\Models\Area';
+    protected $bindModel='Resource\Models\Area';
 
     /**
      * Run the migrations.
@@ -18,7 +18,7 @@ class CreateAreasTable extends Migration
         $model = new $this->bindModel();
         $prefix = $model->getConnection()->getTablePrefix();
         $connection = $model->getConnectionName()?: config('database.default');
-        DB::connection($connection)->statement("CREATE TABLE `".$prefix.$model->getTable()."` (
+        DB::connection($connection)->statement("CREATE TABLE IF NOT EXISTS `".$prefix.$model->getTable()."` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '区域ID',
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT '名称@required',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态:1-显示,2-不显示\$radio@in:1,2',
@@ -43,6 +43,6 @@ class CreateAreasTable extends Migration
         $model = new $this->bindModel();
         $prefix = $model->getConnection()->getTablePrefix();
         $connection = $model->getConnectionName()?: config('database.default');
-        DB::connection($connection)->statement('drop table `'.$prefix.$model->getTable().'`;');
+        DB::connection($connection)->statement('DROP TABLE IF EXISTS `'.$prefix.$model->getTable().'`;');
     }
 }

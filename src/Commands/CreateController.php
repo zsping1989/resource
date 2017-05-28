@@ -23,7 +23,7 @@ class CreateController extends BaseCreate
     protected $description = '自定义模板控制器生成';
 
     protected $type='php';
-    protected $tpl = 'create/controller';
+    protected $tpl = 'php/controller';
     protected $baseNamespace = 'App\Http\Controllers';
 
     protected function getOutputPath(){

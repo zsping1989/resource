@@ -11,6 +11,9 @@ abstract class BaseCreate extends Command
     //模板地址
     protected $tpl = '';
 
+    //模板根目录
+    protected $tpl_base_path = 'zsping1989/resource::';
+
     //生成代码类型
     protected $type='';
 
@@ -19,7 +22,7 @@ abstract class BaseCreate extends Command
 
     //渲染
     protected function render(){
-        return view($this->tpl,$this->datas)->render();
+        return view($this->tpl_base_path.$this->tpl,$this->datas)->render();
     }
 
     abstract protected function getOutputPath();

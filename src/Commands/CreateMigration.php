@@ -22,7 +22,7 @@ class CreateMigration extends BaseCreate
     protected $description = '自定义模板迁移文件生成';
 
     protected $type='php';
-    protected $tpl = 'create/migration';
+    protected $tpl = 'php/migration';
     protected $baseNamespace = '';
     /**
      * 绑定模型

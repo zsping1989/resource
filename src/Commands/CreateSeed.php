@@ -22,7 +22,7 @@ class CreateSeed extends BaseCreate
     protected $description = '自定义模板填充文件生成';
 
     protected $type='php';
-    protected $tpl = 'create/seed';
+    protected $tpl = 'php/seed';
     protected $baseNamespace = '';
     /**
      * 绑定模型

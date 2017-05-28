@@ -25,7 +25,7 @@ class CreateModel extends BaseCreate
     protected $description = '自定义模板模型生成';
 
     protected $type='php';
-    protected $tpl = 'create/model';
+    protected $tpl = 'php/model';
     protected $baseNamespace = 'App\Models';
 
     protected function getOutputPath(){
