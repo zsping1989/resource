@@ -13,6 +13,7 @@ namespace Resource\Controllers;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Resource\Facades\Data;
 
 trait ResourceController{
     /**
@@ -27,6 +28,7 @@ trait ResourceController{
      * @return mixed
      */
     public function index(){
+        $this->addOptions();
         $data['list'] = $this->getList();
         return Response::returns($data); //分页列表页面
     }
@@ -180,6 +182,16 @@ trait ResourceController{
             $this->modelNamespace = 'App\\Models\\';
         }
         return $this->modelNamespace;
+    }
+
+    /**
+     * 结果返回添加筛选条件跟排序
+     */
+    protected function addOptions(){
+        Data::set('options',[
+            'where'=>Request::input('where',new \stdClass()),
+            'order'=>Request::input('order',new \stdClass())
+        ]);
     }
 
     /**

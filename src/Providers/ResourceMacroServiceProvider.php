@@ -2,12 +2,15 @@
 
 namespace Resource\Providers;
 
+use App\Services\GlobalDataRepository;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Resource\Exceptions\CustomValidator;
 use Resource\Commands\CreateController;
+use Resource\Facades\Data;
+use Resource\Facades\GlobalData;
 use Resource\Services\DataRepository;
 
 class ResourceMacroServiceProvider extends ServiceProvider
@@ -23,30 +26,32 @@ class ResourceMacroServiceProvider extends ServiceProvider
         //设置数据库配置
         config(['database.connections.schema'=>config('resource.database.connections.schema')]);
         $macro = $this;
-        $factory->macro('returns', function ($value,$status=200,$view=null) use ($factory,$macro) {
-            $value = collect($value);
+        $factory->macro('returns', function ($value=[],$status=200,$view=null) use ($factory,$macro) {
+            //需要注册全局数据
+            if(!(Request::input('callback') || in_array(Request::input('define'),['AMD','CMD']) ||
+                Request::has('dd') || (Request::ajax() || Request::wantsJson() || Request::has('json')) ||
+                Request::has('script'))){
+                GlobalData::setPageData();
+            }
+
+            $value = collect(Data::all())->merge(collect($value)->toArray());
             if(Request::input('callback')){ //jsonp
-               return $factory->jsonp(Request::input('callback'),$value,$status);
+                return $factory->jsonp(Request::input('callback'),$value,$status);
             }elseif(Request::input('define')=='AMD'){ //AMD
-                $macro->addData($value);
                 $value = 'define([],function(){ return '.collect($value)->toJson().';});';
             }elseif(Request::input('define')=='CMD'){ //CMD
-                $macro->addData($value);
                 $value = 'define([],function(){ return '.collect($value)->toJson().';});';
             }elseif(Request::has('dd')){ //数据打印页面
                 dd($value->toArray());
             }elseif(Request::ajax() || Request::wantsJson() || Request::has('json')){ //json
-                //$macro->addData($value);
                 return $factory->json($value,$status);
             }elseif(Request::has('script')){ //页面
                 $value = 'var '.Request::input('script').' = '.collect($value)->toJson().';';
             }else{
-                $macro->addData($value);
-                return $factory->json($value,$status);
                 $view1 = $view?:Route::getCurrentRoute()->getCompiled()->getStaticPrefix();
                 view()->share('_view',$view1);
                 view()->share('page',collect(explode('/',$view1))->filter()->implode('-'));
-                return view($view?:'/layouts/home',['data'=>$value]);
+                return view($view?:'/layouts/app',['data'=>$value]);
             }
             return $factory->make($value,$status);
         });
@@ -91,6 +96,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../Publishes/database/seeds' => database_path('seeds'),
             __DIR__.'/../Publishes/database/migrations' => database_path('migrations'),
+            __DIR__.'/../Publishes/Services' => app_path('Services'),
             __DIR__.'/../Publishes/configs' => config_path(),
             __DIR__.'/../Views' => base_path('resources/views/vendor/zsping1989/resource')
         ]);
@@ -104,17 +110,6 @@ class ResourceMacroServiceProvider extends ServiceProvider
     }
 
     /**
-     * 添加全局数据
-     * @param $value
-     */
-    public function addData(&$value){
-        $value['options'] = [
-            'where'=>Request::input('where',new \stdClass()),
-            'order'=>Request::input('order',new \stdClass())
-        ];
-    }
-
-    /**
      * Register the application services.
      *
      * @return void
@@ -122,6 +117,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
     public function register()
     {
         //返回数据存放
-        $this->app->singleton('option', DataRepository::class);
+        $this->app->singleton('data', DataRepository::class);
+        $this->app->singleton('global.data', GlobalDataRepository::class);
     }
 }
