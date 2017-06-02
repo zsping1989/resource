@@ -13,6 +13,6 @@ class Data extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'option';
+        return 'data';
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Resource\Services;
 
-use \Illuminate\Support\Facades\DB;
 use ArrayAccess;
 use Illuminate\Support\Arr;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
@@ -61,21 +60,6 @@ class DataRepository implements ArrayAccess, ConfigContract
         }
     }
 
-    protected function save()
-    {
-        $this->items_modified = array_unique($this->items_modified);
-
-        foreach ($this->items_modified as $key) {
-            if (!DB::table('configs')->where('key', $key)->first()) {
-                DB::table('configs')
-                    ->insert(['key' => $key, 'value' => $this[$key]]);
-            } else {
-                DB::table('configs')
-                    ->where('key', $key)
-                    ->update(['value' => $this[$key]]);
-            }
-        }
-    }
 
     /**
      * Prepend a value onto an array option value.
@@ -164,12 +148,6 @@ class DataRepository implements ArrayAccess, ConfigContract
         $this->set($key, null);
     }
 
-    /**
-     * Save all modified options into database
-     */
-    public function __destruct()
-    {
-        $this->save();
-    }
+
 
 }

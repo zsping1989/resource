@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Resource\Exceptions\CustomValidator;
 use Resource\Commands\CreateController;
+use Resource\Services\DataRepository;
+
 class ResourceMacroServiceProvider extends ServiceProvider
 {
     /**
@@ -119,6 +121,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        //返回数据存放
+        $this->app->singleton('option', DataRepository::class);
     }
 }
