@@ -29,7 +29,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
         $factory->macro('returns', function ($value=[],$status=200,$view=null) use ($factory,$macro) {
             //需要注册全局数据
             if(!(Request::input('callback') || in_array(Request::input('define'),['AMD','CMD']) ||
-                Request::has('dd') || (Request::ajax() || Request::wantsJson() || Request::has('json')) ||
+                Request::has('dd') || (Request::ajax() || Request::wantsJson() /*|| Request::has('json')*/) ||
                 Request::has('script'))){
                 GlobalData::setPageData();
             }
@@ -51,7 +51,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
                 $view1 = $view?:Route::getCurrentRoute()->getCompiled()->getStaticPrefix();
                 view()->share('_view',$view1);
                 view()->share('page',collect(explode('/',$view1))->filter()->implode('-'));
-                return view($view?:'/layouts/app',['data'=>$value]);
+                return view($view?:'/layouts/admin',['data'=>$value]);
             }
             return $factory->make($value,$status);
         });
