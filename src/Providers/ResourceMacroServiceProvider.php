@@ -29,7 +29,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
         $factory->macro('returns', function ($value=[],$status=200,$view=null) use ($factory,$macro) {
             //需要注册全局数据
             if(!(Request::input('callback') || in_array(Request::input('define'),['AMD','CMD']) ||
-                Request::has('dd') || (Request::ajax() || Request::wantsJson() || Request::has('json')) ||
+                Request::has('dd') || (Request::ajax() || Request::wantsJson() /*|| Request::has('json')*/) ||
                 Request::has('script'))){
                 GlobalData::setPageData();
             }
@@ -48,10 +48,14 @@ class ResourceMacroServiceProvider extends ServiceProvider
             }elseif(Request::has('script')){ //页面
                 $value = 'var '.Request::input('script').' = '.collect($value)->toJson().';';
             }else{
-                $view1 = $view?:Route::getCurrentRoute()->getCompiled()->getStaticPrefix();
-                view()->share('_view',$view1);
-                view()->share('page',collect(explode('/',$view1))->filter()->implode('-'));
-                return view($view?:'/layouts/app',['data'=>$value]);
+                $path = collect(explode('/',Route::getCurrentRoute()
+                    ->getCompiled()
+                    ->getStaticPrefix()))->filter()->values();
+                $blade = $view?:'/layouts/'.$path->first();
+                view()->share('page',$path->forget(0)->map(function($item){
+                    return str_replace('-','_',$item);
+                })->implode('-'));
+                return view($blade,['data'=>$value]);
             }
             return $factory->make($value,$status);
         });
