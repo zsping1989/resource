@@ -114,8 +114,10 @@ function alert($data = [],$status=200){
     $defult  = [
         200=>[
             'showClose'=> true, //显示关闭按钮
-            'message'=> '操作成功!', //消息内容
+            'title'=> '操作成功!', //消息内容
+            'message'=> '', //消息内容
             'type'=>'success', //消息类型
+            'position'=>'top',
             'iconClass'=>'', //图标
             'customClass'=>'', //自定义样式
             'duration'=>3000, //显示时间毫秒
@@ -123,8 +125,10 @@ function alert($data = [],$status=200){
         ],
         'other'=>[
             'showClose'=> true, //显示关闭按钮
-            'message'=> '操作失败!', //消息内容
-            'type'=>'error', //消息类型
+            'title'=> '操作失败!', //消息内容
+            'message'=> '', //消息内容
+            'type'=>'danger', //消息类型
+            'position'=>'top',
             'iconClass'=>'', //图标
             'customClass'=>'', //自定义样式
             'duration'=>3000, //显示时间毫秒
