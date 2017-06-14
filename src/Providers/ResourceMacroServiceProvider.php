@@ -11,6 +11,7 @@ use Resource\Exceptions\CustomValidator;
 use Resource\Commands\CreateController;
 use Resource\Facades\Data;
 use Resource\Facades\GlobalData;
+use Resource\Services\ConditionRepository;
 use Resource\Services\DataRepository;
 
 class ResourceMacroServiceProvider extends ServiceProvider
@@ -33,8 +34,8 @@ class ResourceMacroServiceProvider extends ServiceProvider
                 Request::has('script'))){
                 GlobalData::setPageData();
             }
-
-            $value = collect(Data::all())->merge(collect($value)->toArray());
+            Data::set(collect($value)->toArray());
+            $value = collect(Data::all());
             if(Request::input('callback')){ //jsonp
                 return $factory->jsonp(Request::input('callback'),$value,$status);
             }elseif(Request::input('define')=='AMD'){ //AMD
@@ -123,5 +124,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
         //返回数据存放
         $this->app->singleton('data', DataRepository::class);
         $this->app->singleton('global.data', GlobalDataRepository::class);
+        //筛选排序存储
+        $this->app->singleton('condition', ConditionRepository::class);
     }
 }

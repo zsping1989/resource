@@ -12,6 +12,7 @@ namespace Resource\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
+use Resource\Facades\Condition;
 
 trait CommonController{
     /**
@@ -143,9 +144,8 @@ trait CommonController{
             }
         });
         $this->otherSizerOutput AND $where = array_merge($this->otherSizerOutput,$where);
-        Request::offsetSet('where',$where);
         $options['order'] = collect($input->get('order',[]))->merge($this->orderDefault)->toArray();
-        Request::offsetSet('order',$options['order']);
+        Condition::set($options);
         return $options;
     }
 

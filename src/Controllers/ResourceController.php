@@ -13,6 +13,7 @@ namespace Resource\Controllers;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Resource\Facades\Condition;
 use Resource\Facades\Data;
 
 trait ResourceController{
@@ -28,8 +29,8 @@ trait ResourceController{
      * @return mixed
      */
     public function index(){
-        $this->addOptions();
         $data['list'] = $this->getList();
+        $this->addOptions();
         return Response::returns($data); //分页列表页面
     }
 
@@ -76,7 +77,9 @@ trait ResourceController{
      * 获取翻页数据
      */
     public function getList(){
-        return $this->getWithOptionModel()->paginate(); //获取分页数据
+        $data = $this->getWithOptionModel()->paginate(); //获取分页数据
+        Data::set('list',$data); //返回响应数据
+        return $data;
     }
 
     /**
@@ -114,17 +117,17 @@ trait ResourceController{
         if($id){
             $res = $this->bindModel->find($id)->update($data);
             if($res===false){
-                return ['alert'=>alert(['message'=>'修改失败!'],500)];
+                return Response::returns(['alert'=>alert(['message'=>'修改失败!'],500)]);
             }
-            return ['alert'=>alert(['message'=>'修改成功!'])];
+            return Response::returns(['alert'=>alert(['message'=>'修改成功!'])]);
         }
 
         //新增
         $res = $this->bindModel->create($data);
         if($res===false){
-            return ['alert'=>alert(['message'=>'新增失败!'],500)];
+            return Response::returns(['alert'=>alert(['message'=>'新增失败!'],500)]);
         }
-        return ['alert'=>alert(['message'=>'新增成功!'])];
+        return Response::returns(['alert'=>alert(['message'=>'新增成功!'])]);
     }
 
     /**
@@ -135,9 +138,9 @@ trait ResourceController{
         $this->bindModel OR $this->bindModel(); //绑定模型
         $res = $this->bindModel->destroy(Request::input('ids',[]));
         if($res===false){
-            return ['alert'=>alert(['message'=>'删除失败!'],500)];
+            return Response::returns(['alert'=>alert(['message'=>'删除失败!'],500)]);
         }
-        return ['alert'=>alert(['message'=>'删除成功!'])];
+        return Response::returns(['alert'=>alert(['message'=>'删除成功!'])]);
     }
 
     /**
@@ -189,8 +192,8 @@ trait ResourceController{
      */
     protected function addOptions(){
         Data::set('options',[
-            'where'=>Request::input('where',new \stdClass()),
-            'order'=>Request::input('order',new \stdClass())
+            'where'=>Condition::get('where',new \stdClass()),
+            'order'=>Condition::get('order',new \stdClass())
         ]);
     }
 
