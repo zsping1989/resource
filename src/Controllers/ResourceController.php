@@ -12,6 +12,7 @@ namespace Resource\Controllers;
 
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 use Resource\Facades\Condition;
 use Resource\Facades\Data;
@@ -30,6 +31,7 @@ trait ResourceController{
      */
     public function index(){
         $data['list'] = $this->getList();
+        $data['configUrl'] = $this->getConfigUrl();
         $this->addOptions();
         return Response::returns($data); //分页列表页面
     }
@@ -195,6 +197,30 @@ trait ResourceController{
             'where'=>Condition::get('where',new \stdClass()),
             'order'=>Condition::get('order',new \stdClass())
         ]);
+    }
+
+    /**
+     * 获取资源控制器操作地址
+     * @return static
+     */
+    public function getConfigUrl(){
+        $main = Route::getCurrentRoute()
+            ->getCompiled()
+            ->getStaticPrefix();
+        $data = collect([
+            'dataUrl'=>'list',
+            'editUrl'=>'edit',
+            'destroyUrl'=>'destroy',
+            'exportUrl'=>'export'
+        ])->map(function($value)use($main){
+            return str_replace('index',$value,$main);
+        });
+        if($this->checkPermission){
+            $data = $data->map(function($value){
+                return app('user.logic')->hasPermission($value) ? $value : '';
+            });
+        }
+        return $data;
     }
 
     /**

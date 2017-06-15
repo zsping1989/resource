@@ -34,9 +34,9 @@ class CreateView extends BaseCreate
      */
     protected function getOutputPath(){
         if($this->argument('output')){
-            $this->outputPath = resource_path('views/'.$this->argument('output'));
+            $this->outputPath = resource_path('assets/js/'.$this->argument('output'));
         }else{
-            $this->outputPath = resource_path('views/admin/'.snake_case(basename($this->argument('model'))).'/'.studly_case($this->argument('template')));
+            $this->outputPath = resource_path('assets/js/admin/'.snake_case(basename($this->argument('model'))).'/'.studly_case($this->argument('template')));
         }
     }
 
@@ -54,6 +54,18 @@ class CreateView extends BaseCreate
         $this->bindModel = new $model();
         $data = $this->bindModel->getTableInfo();
         $data['path'] = str_singular($this->bindModel->getTable());
+        if($this->argument('template')=='index'){
+            $data['show_fields'] = collect($data['table_fields'])
+                ->filter(function($item){
+                    return !in_array($item['showType'],['password','hidden','delete']) && !in_array($item['Field'],['deleted_at']);
+                })->keyBy('Field')->map(function($item){
+                    return [
+                        'name'=>$item['info'],
+                        'order'=>true,
+                    ];
+                });
+
+        }
         $this->datas = $data;
     }
 }

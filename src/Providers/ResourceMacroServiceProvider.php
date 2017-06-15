@@ -126,5 +126,6 @@ class ResourceMacroServiceProvider extends ServiceProvider
         $this->app->singleton('global.data', GlobalDataRepository::class);
         //筛选排序存储
         $this->app->singleton('condition', ConditionRepository::class);
+
     }
 }

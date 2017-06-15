@@ -7,13 +7,7 @@
  * 自定义辅助函数
  */
 
-/**
- * 创建资源路由
- * @param $name
- * @param $controller
- * @param array $options
- */
-function createRessorceRoute($name, $controller, array $options = []){
+function getRessorceRoutes($name, $controller, array $options = []){
     //控制器默认路由注册
     $methods = collect([
         'index'=>[ //列表页面
@@ -35,6 +29,13 @@ function createRessorceRoute($name, $controller, array $options = []){
             'method'=>[
                 'name'=>'export',
                 'type'=>'get'
+            ]
+        ],
+        'import'=>[
+            'route'=>'import',
+            'method'=>[
+                'name'=>'import',
+                'type'=>'post'
             ]
         ],
         'add'=>[ //添加数据
@@ -77,6 +78,18 @@ function createRessorceRoute($name, $controller, array $options = []){
         $except AND $methods = $methods->except($except);
         $only AND $methods = $methods->only($only);
     }
+    return $methods;
+}
+
+/**
+ * 创建资源路由
+ * @param $name
+ * @param $controller
+ * @param array $options
+ */
+function createRessorceRoute($name, $controller, array $options = []){
+    //控制器默认路由注册
+    $methods = getRessorceRoutes($name, $controller,$options);
     //路由注册
     $methods->map(function($item)use($name,$controller){
         $type = array_get($item,'method.type',false);

@@ -39,11 +39,14 @@ trait CommonController{
      */
     protected $orderDefault=[];
 
+    protected $checkPermission = false;
+
     /**
      * 字段名称显示
      * @var array
      */
     protected $showFields=[];
+
 
     /**
      * 显示字段表前缀自定义

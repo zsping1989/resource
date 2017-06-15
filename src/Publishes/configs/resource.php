@@ -7,6 +7,7 @@
  */
 
 return [
+    //数据库配置添加
     'database'=>[
         'connections'=>[
             'schema' => [
@@ -23,6 +24,15 @@ return [
                 'strict' => true,
                 'engine' => null,
             ]
+        ]
+    ],
+    //服务提供者添加
+    'app'=>[
+        'providers'=>[
+            Maatwebsite\Excel\ExcelServiceProvider::class,
+        ],
+        'aliases'=>[
+            'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         ]
     ]
 ];
