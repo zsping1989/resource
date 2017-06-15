@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 trait BaseModel{
 
     /**
-     * 替换插入
+     * 批量替换插入
      */
     public function scopeInsertReplaceAll($query,$datas){
         $datas = collect($datas);

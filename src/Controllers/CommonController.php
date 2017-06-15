@@ -12,6 +12,7 @@ namespace Resource\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
+use Resource\Facades\Condition;
 
 trait CommonController{
     /**
@@ -38,11 +39,14 @@ trait CommonController{
      */
     protected $orderDefault=[];
 
+    protected $checkPermission = false;
+
     /**
      * 字段名称显示
      * @var array
      */
     protected $showFields=[];
+
 
     /**
      * 显示字段表前缀自定义
@@ -128,7 +132,6 @@ trait CommonController{
                             'val'=>$val
                         ];
                     }
-
                     $where[$key][$k] = $val?: '';
                 }
             }else{
@@ -142,10 +145,10 @@ trait CommonController{
                 $where[$key] = $val?: '';
             }
         });
+
         $this->otherSizerOutput AND $where = array_merge($this->otherSizerOutput,$where);
-        Request::offsetSet('where',$where);
         $options['order'] = collect($input->get('order',[]))->merge($this->orderDefault)->toArray();
-        Request::offsetSet('order',$options['order']);
+        Condition::set(['where'=>$where,'order'=>$options['order']]);
         return $options;
     }
 

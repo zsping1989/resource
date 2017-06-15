@@ -7,13 +7,7 @@
  * 自定义辅助函数
  */
 
-/**
- * 创建资源路由
- * @param $name
- * @param $controller
- * @param array $options
- */
-function createRessorceRoute($name, $controller, array $options = []){
+function getRessorceRoutes($name, $controller, array $options = []){
     //控制器默认路由注册
     $methods = collect([
         'index'=>[ //列表页面
@@ -35,6 +29,13 @@ function createRessorceRoute($name, $controller, array $options = []){
             'method'=>[
                 'name'=>'export',
                 'type'=>'get'
+            ]
+        ],
+        'import'=>[
+            'route'=>'import',
+            'method'=>[
+                'name'=>'import',
+                'type'=>'post'
             ]
         ],
         'add'=>[ //添加数据
@@ -77,6 +78,18 @@ function createRessorceRoute($name, $controller, array $options = []){
         $except AND $methods = $methods->except($except);
         $only AND $methods = $methods->only($only);
     }
+    return $methods;
+}
+
+/**
+ * 创建资源路由
+ * @param $name
+ * @param $controller
+ * @param array $options
+ */
+function createRessorceRoute($name, $controller, array $options = []){
+    //控制器默认路由注册
+    $methods = getRessorceRoutes($name, $controller,$options);
     //路由注册
     $methods->map(function($item)use($name,$controller){
         $type = array_get($item,'method.type',false);
@@ -114,8 +127,10 @@ function alert($data = [],$status=200){
     $defult  = [
         200=>[
             'showClose'=> true, //显示关闭按钮
-            'message'=> '操作成功!', //消息内容
+            'title'=> '操作成功!', //消息内容
+            'message'=> '', //消息内容
             'type'=>'success', //消息类型
+            'position'=>'top',
             'iconClass'=>'', //图标
             'position'=>'top', //图标
             'customClass'=>'', //自定义样式
@@ -124,9 +139,10 @@ function alert($data = [],$status=200){
         ],
         'other'=>[
             'showClose'=> true, //显示关闭按钮
-            'message'=> '操作失败!', //消息内容
-            'position'=>'top', //图标
-            'type'=>'error', //消息类型
+            'title'=> '操作失败!', //消息内容
+            'message'=> '', //消息内容
+            'type'=>'danger', //消息类型
+            'position'=>'top',
             'iconClass'=>'', //图标
             'customClass'=>'', //自定义样式
             'duration'=>3000, //显示时间毫秒
