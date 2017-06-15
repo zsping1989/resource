@@ -9,7 +9,7 @@
  *
  */
 
-namespace Resource\Exceptions;
+namespace Resource\Validators;
 
 
 use Illuminate\Support\Facades\Auth;

@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Resource\Exceptions\CustomValidator;
 use Resource\Commands\CreateController;
 use Resource\Facades\Data;
 use Resource\Facades\GlobalData;
 use Resource\Services\ConditionRepository;
 use Resource\Services\DataRepository;
+use Resource\Validators\CustomValidator;
 
 class ResourceMacroServiceProvider extends ServiceProvider
 {
