@@ -132,7 +132,6 @@ trait CommonController{
                             'val'=>$val
                         ];
                     }
-
                     $where[$key][$k] = $val?: '';
                 }
             }else{
@@ -146,9 +145,10 @@ trait CommonController{
                 $where[$key] = $val?: '';
             }
         });
+
         $this->otherSizerOutput AND $where = array_merge($this->otherSizerOutput,$where);
         $options['order'] = collect($input->get('order',[]))->merge($this->orderDefault)->toArray();
-        Condition::set($options);
+        Condition::set(['where'=>$where,'order'=>$options['order']]);
         return $options;
     }
 
