@@ -56,6 +56,8 @@ abstract class BaseCreate extends Command
     public function handle()
     {
         $this->readyDatas();
+        $this->datas['startSymbol']='{{';
+        $this->datas['endSymbol']='}}';
         $this->create();
     }
 

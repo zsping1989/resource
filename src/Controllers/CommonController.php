@@ -39,13 +39,25 @@ trait CommonController{
      */
     protected $orderDefault=[];
 
+    /**
+     * 是否检查用户拥护的url权限
+     * 获取Index页面的url配置地址
+     * @var bool
+     */
     protected $checkPermission = false;
 
     /**
-     * 字段名称显示
+     * Index页面字段名称显示
      * @var array
      */
-    protected $showFields=[];
+    public $showIndexFields=[];
+
+
+
+
+
+
+
 
 
     /**
@@ -53,6 +65,64 @@ trait CommonController{
      * @var array
      */
     protected $showPrefixions = [];
+
+
+    /**
+     * 查询需要输出的字段信息
+     * @param $data
+     * @param array $result
+     * @param string $k
+     * @return array
+     */
+    public function getWithFields($data, &$result = [], $k = '')
+    {
+        foreach ($data as $key => $item) {
+            if (is_array($item)) {
+                $fileds = $this->selectFields($item);
+                if ($fileds) {
+                    $result[$k ? $k . '.' . $key : $key] = $fileds;
+                } else {
+                    $result[] = $k ? $k . '.' . $key : $key;
+                }
+                $this->getWithFields($item, $result, $k ? $k . '.' . $key : $key);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 查询所需字段
+     * @return array
+     */
+    protected function selectWithFields(){
+        $result = [];
+        foreach($this->getWithFields($this->showIndexFields) as $key=>$withField){
+            if(is_array($withField)){
+                $result[$key] = function($q)use($withField){
+                    $q->select($withField);
+                };
+            }else{
+                $result[$key] = $withField;
+            }
+        }
+        return $result;
+    }
+
+
+    /**
+     * 查询字段
+     * @param $fields
+     * @return array
+     */
+    public function selectFields($fields)
+    {
+        $result = [];
+        foreach ($fields as $field) {
+            !is_array($field) and $result[] = $field;
+        }
+        return $result;
+    }
+
 
     /**
      * 获取关联关系表字段备注信息
