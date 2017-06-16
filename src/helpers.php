@@ -181,7 +181,30 @@ function getRelationData($data,&$result = []){
     return $result;
 }
 
-
+/**
+ * 转换成一级key
+ * @param $data
+ * @param array $result
+ * @param string $k
+ * @return array
+ */
+function toLateralKey($data,&$result=[],$k=''){
+    if (!is_array($data)) {
+        return $data;
+    } else {
+        foreach($data as $key=>$item){
+            if(!is_array($item)){
+                $result[] = $k ? $k.'.'.$item:$item;
+            }else{
+                toLateralKey($item,$result,$k ? $k.'.'.$key :$key);
+            }
+        }
+        if($k && !count($data)){
+            $result[] = $k;
+        }
+    }
+    return $result;
+}
 
 
 
