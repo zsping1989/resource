@@ -210,6 +210,17 @@ trait BaseModel{
         return $data;
     }
 
+    /**
+     * 获取字段显示映射信息
+     * @return array
+     */
+    public function scopeGetFieldsMap(){
+        if(!isset($this->fieldsShowMaps)){
+            return [];
+        }
+        return $this->fieldsShowMaps;
+    }
+
 
 
 

@@ -17,7 +17,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Resource\Facades\Condition;
 use Resource\Facades\Data;
 
-trait ResourceController{
+trait ResourceController
+{
     /**
      * 绑定模型
      * @var
@@ -25,39 +26,81 @@ trait ResourceController{
     protected $bindModel;
 
 
+
+
     /**
      * 列表页面
      * @return mixed
      */
-    public function index(){
+    public function index()
+    {
+        //查询数据结果
         $data['list'] = $this->getList();
+        //数据字段映射信息
+        $data['maps'] = $this->bindModel()->getFieldsMap();
+        //增删改查URL地址
         $data['configUrl'] = $this->getConfigUrl();
+        //条件筛选及排序返回
         $this->addOptions();
-        return Response::returns($data); //分页列表页面
+        //数据返回
+        return Response::returns($data);
+    }
+
+    /**
+     * 获取翻页数据
+     */
+    public function getList()
+    {
+        //获取带有筛选条件的对象
+        $obj = $this->getWithOptionModel();
+        //指定查询字段
+        $fields = $this->selectFields($this->showIndexFields);
+        $fields and $obj->select(in_array($this->bindModel()->getKeyName(),$fields)?$fields:array_merge([$this->bindModel()->getKeyName()],$fields));
+        //获取分页数据
+        $data = $obj->paginate();
+        //返回响应数据存放,方便操作日志记录
+        Data::set('list', $data);
+        return $data;
+    }
+
+
+
+
+    /**
+     * 获取条件拼接对象
+     * @return mixed
+     */
+    public function getWithOptionModel()
+    {
+        $this->bindModel OR $this->bindModel();
+        $obj = $this->bindModel->with($this->selectWithFields())
+            ->options($this->getOptions());
+        return $obj;
     }
 
     /**
      * excel导出
      */
-    public function export(){
-        ini_set ('memory_limit', -1);
-        Excel::create($this->bindModel()->getTable(),function($excel){
-            $excel->sheet('score', function($sheet){
+    public function export()
+    {
+        ini_set('memory_limit', -1);
+        Excel::create($this->bindModel()->getTable(), function ($excel) {
+            $excel->sheet('score', function ($sheet) {
                 $keys = toLateralKey($this->showFields);
-                if(!$keys){
+                if (!$keys) {
                     $sheet->rows([]);
-                    return ;
+                    return;
                 }
-                $all_titles = $this->relationTables($this->showFields,$this->bindModel());
-                $title = collect($keys)->map(function($item)use($all_titles){
-                    return array_get($all_titles,$item,'');
+                $all_titles = $this->relationTables($this->showFields, $this->bindModel());
+                $title = collect($keys)->map(function ($item) use ($all_titles) {
+                    return array_get($all_titles, $item, '');
                 });
                 $data = collect($this->getWithOptionModel()
                     ->get())
-                    ->map(function($item)use($keys){
+                    ->map(function ($item) use ($keys) {
                         $item = $item->toArray();
-                        $row = collect($keys)->map(function($key)use($item){
-                            return array_get($item,$key,'');
+                        $row = collect($keys)->map(function ($key) use ($item) {
+                            return array_get($item, $key, '');
                         });
                         return $row;
                     })
@@ -70,79 +113,65 @@ trait ResourceController{
     /**
      * 编辑页面
      */
-    public function edit($id=null){
+    public function edit($id = null)
+    {
         $data['row'] = $this->getOne($id);
         return Response::returns($data); //获取一条记录
     }
 
-    /**
-     * 获取翻页数据
-     */
-    public function getList(){
-        $data = $this->getWithOptionModel()->paginate(); //获取分页数据
-        Data::set('list',$data); //返回响应数据
-        return $data;
-    }
 
     /**
      * 获取一条编辑数据
      * @param null $id
      * @return \stdClass
      */
-    public function getOne($id=null){
+    public function getOne($id = null)
+    {
         $this->bindModel OR $this->bindModel(); //绑定模型
-        if(!$id){ //没有数据返回空对象
+        if (!$id) { //没有数据返回空对象
             return $this->getDefault($this->getResourceModel());
         }
         return $this->bindModel->findOrFail($id); //没有数据抛出异常
     }
 
-    /**
-     * 获取条件拼接对象
-     * @return mixed
-     */
-    public function getWithOptionModel(){
-        $this->bindModel OR $this->bindModel();
-        $obj = $this->bindModel->with($this->getWith($this->showFields))
-            ->options($this->getOptions());
-        return $obj;
-    }
 
     /**
      * 执行修改或添加
      */
-    public function postEdit(\Illuminate\Http\Request $request){
-        $this->validate($request,$this->getValidateRule());//验证数据
+    public function postEdit(\Illuminate\Http\Request $request)
+    {
+        $this->validate($request, $this->getValidateRule());//验证数据
         $id = $request->get('id');
         $this->bindModel OR $this->bindModel(); //绑定模型
         $data = $id ? $request->all() : $request->except('id');
-        if($id){
+        if ($id) {
             $res = $this->bindModel->find($id)->update($data);
-            if($res===false){
-                return Response::returns(['alert'=>alert(['message'=>'修改失败!'],500)]);
+            if ($res === false) {
+                return Response::returns(['alert' => alert(['message' => '修改失败!'], 500)]);
             }
-            return Response::returns(['alert'=>alert(['message'=>'修改成功!'])]);
+            return Response::returns(['alert' => alert(['message' => '修改成功!'])]);
         }
 
         //新增
         $res = $this->bindModel->create($data);
-        if($res===false){
-            return Response::returns(['alert'=>alert(['message'=>'新增失败!'],500)]);
+        if ($res === false) {
+            return Response::returns(['alert' => alert(['message' => '新增失败!'], 500)]);
         }
-        return Response::returns(['alert'=>alert(['message'=>'新增成功!'])]);
+        return Response::returns(['alert' => alert(['message' => '新增成功!'])]);
     }
 
     /**
      * 删除数据
      * @return mixed
      */
-    public function postDestroy(){
+    public function postDestroy()
+    {
         $this->bindModel OR $this->bindModel(); //绑定模型
-        $res = $this->bindModel->destroy(Request::input('ids',[]));
-        if($res===false){
-            return Response::returns(['alert'=>alert(['message'=>'删除失败!'],500)]);
+        $res = $this->bindModel->destroy(Request::input('ids', []));
+        if ($res === false) {
+            return Response::returns(['alert' => alert(['message' => '删除失败!'], 500)]);
         }
-        return Response::returns(['alert'=>alert(['message'=>'删除成功!'])]);
+        return Response::returns(['alert' => alert(['message' => '删除成功!'])]);
     }
 
     /**
@@ -150,8 +179,9 @@ trait ResourceController{
      * @param $model_name
      * @return \stdClass
      */
-    protected function getDefault($model_name){
-        $model = $this->modelNamespace.$model_name;
+    protected function getDefault($model_name)
+    {
+        $model = $this->modelNamespace . $model_name;
         $model = new $model();
         return collect(array_flip($model->getFillable()))->map(function ($item) {
             return null;
@@ -162,17 +192,19 @@ trait ResourceController{
      * 获取绑定的资源模型
      * @return mixed
      */
-    protected function getResourceModel(){
-        return $this->resourceModel?:str_replace('Controller','',class_basename(get_class()));
+    protected function getResourceModel()
+    {
+        return $this->resourceModel ?: str_replace('Controller', '', class_basename(get_class()));
     }
 
     /**
      * 绑定模型
      * @return mixed
      */
-    protected function bindModel(){
-        if(!$this->bindModel){
-            $resourceModel = $this->getModelNamespace().$this->getResourceModel();
+    public function bindModel()
+    {
+        if (!$this->bindModel) {
+            $resourceModel = $this->getModelNamespace() . $this->getResourceModel();
             $this->bindModel = new $resourceModel();
         }
         return $this->bindModel;
@@ -182,8 +214,9 @@ trait ResourceController{
      * 设置模型的命名空间
      * @return mixed
      */
-    protected function getModelNamespace(){
-        if(!isset($this->modelNamespace)){
+    protected function getModelNamespace()
+    {
+        if (!isset($this->modelNamespace)) {
             $this->modelNamespace = 'App\\Models\\';
         }
         return $this->modelNamespace;
@@ -192,10 +225,11 @@ trait ResourceController{
     /**
      * 结果返回添加筛选条件跟排序
      */
-    protected function addOptions(){
-        Data::set('options',[
-            'where'=>Condition::get('where',new \stdClass()),
-            'order'=>Condition::get('order',new \stdClass())
+    protected function addOptions()
+    {
+        Data::set('options', [
+            'where' => Condition::get('where', new \stdClass()),
+            'order' => Condition::get('order', new \stdClass())
         ]);
     }
 
@@ -203,20 +237,21 @@ trait ResourceController{
      * 获取资源控制器操作地址
      * @return static
      */
-    public function getConfigUrl(){
+    public function getConfigUrl()
+    {
         $main = Route::getCurrentRoute()
             ->getCompiled()
             ->getStaticPrefix();
         $data = collect([
-            'dataUrl'=>'list',
-            'editUrl'=>'edit',
-            'destroyUrl'=>'destroy',
-            'exportUrl'=>'export'
-        ])->map(function($value)use($main){
-            return str_replace('index',$value,$main);
+            'dataUrl' => 'list',
+            'editUrl' => 'edit',
+            'destroyUrl' => 'destroy',
+            'exportUrl' => 'export'
+        ])->map(function ($value) use ($main) {
+            return str_replace('index', $value, $main);
         });
-        if($this->checkPermission){
-            $data = $data->map(function($value){
+        if ($this->checkPermission) {
+            $data = $data->map(function ($value) {
                 return app('user.logic')->hasPermission($value) ? $value : '';
             });
         }

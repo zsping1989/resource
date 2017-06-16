@@ -11,7 +11,7 @@ class CreateView extends BaseCreate
      *
      * @var string
      */
-    protected $signature = 'create:view {model} {template} {output?} {--namespace}';
+    protected $signature = 'create:view {controller} {template} {output?} {--namespace}';
 
     /**
      * The console command description.
@@ -36,7 +36,7 @@ class CreateView extends BaseCreate
         if($this->argument('output')){
             $this->outputPath = resource_path('assets/js/'.$this->argument('output'));
         }else{
-            $this->outputPath = resource_path('assets/js/admin/'.snake_case(basename($this->argument('model'))).'/'.studly_case($this->argument('template')));
+            $this->outputPath = resource_path('assets/js/admin/'.snake_case(basename($this->argument('controller'))).'/'.studly_case($this->argument('template')));
         }
     }
 
@@ -47,24 +47,28 @@ class CreateView extends BaseCreate
         $this->tpl = 'html/'.$this->argument('template');
         $data['model_namespace'] = false;
         if($this->option('namespace')){
-            $model = str_replace('/','\\',$this->argument('model'));
+            $controller = str_replace('/','\\',$this->argument('controller')).'Controller';
         }else{
-            $model = 'App\\'.str_replace('/','\\',$this->argument('model'));
+            $controller = 'App\\Http\\Controllers\\'.str_replace('/','\\',$this->argument('controller')).'Controller';
         }
-        $this->bindModel = new $model();
+        $controller = new $controller();
+        $this->bindModel = $controller->bindModel(); //绑定模型
         $data = $this->bindModel->getTableInfo();
+        $data['table_fields'] = collect($data['table_fields'])->keyBy('Field')->toArray();
         $data['path'] = str_singular($this->bindModel->getTable());
         if($this->argument('template')=='index'){
+            $fields = $controller->selectFields($controller->showIndexFields); //需要显示的字段
             $data['show_fields'] = collect($data['table_fields'])
-                ->filter(function($item){
-                    return !in_array($item['showType'],['password','hidden','delete']) && !in_array($item['Field'],['deleted_at']);
+                ->filter(function($item)use($fields){
+                    return (!in_array($item['showType'],['password','hidden','delete']) &&
+                    !in_array($item['Field'],['deleted_at'])) &&
+                    (!$fields || in_array($item['Field'],$fields));
                 })->keyBy('Field')->map(function($item){
                     return [
                         'name'=>$item['info'],
                         'order'=>true,
                     ];
                 });
-
         }
         $this->datas = $data;
     }

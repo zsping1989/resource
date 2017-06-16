@@ -180,7 +180,27 @@ function getRelationData($data,&$result = []){
     return $result;
 }
 
-
+/**
+ * 多级数组转换为一级
+ * @param $data
+ * @param array $result
+ * @param string $key
+ * @return mixed
+ */
+function toLateralData($data,&$result=[],$k=''){
+    if (!is_array($data)) {
+        return $data;
+    } else {
+        foreach($data as $key=>$item){
+            if(!is_array($item)){
+                $result[$k.$key] = $item;
+            }else{
+                toLateralData($item,$result,$k.$key.'.');
+            }
+        }
+    }
+    return $result;
+}
 
 
 
