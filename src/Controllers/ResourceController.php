@@ -116,6 +116,10 @@ trait ResourceController
     public function edit($id = null)
     {
         $data['row'] = $this->getOne($id);
+        //数据字段映射信息
+        $data['maps'] = $this->bindModel()->getFieldsMap();
+        //增删改查URL地址
+        $data['configUrl'] = $this->getConfigUrl('edit');
         return Response::returns($data); //获取一条记录
     }
 
@@ -237,18 +241,19 @@ trait ResourceController
      * 获取资源控制器操作地址
      * @return static
      */
-    public function getConfigUrl()
+    public function getConfigUrl($type='index')
     {
         $main = Route::getCurrentRoute()
             ->getCompiled()
             ->getStaticPrefix();
         $data = collect([
-            'dataUrl' => 'list',
-            'editUrl' => 'edit',
-            'destroyUrl' => 'destroy',
-            'exportUrl' => 'export'
-        ])->map(function ($value) use ($main) {
-            return str_replace('index', $value, $main);
+            'dataUrl' => 'list', //翻页url
+            'editUrl' => 'edit', //编辑页面
+            'destroyUrl' => 'destroy', //删除url
+            'exportUrl' => 'export', //导出url
+            'backUrl' => 'index' //编辑后返回url
+        ])->map(function ($value) use ($main,$type) {
+            return str_replace($type, $value, $main);
         });
         if ($this->checkPermission) {
             $data = $data->map(function ($value) {
