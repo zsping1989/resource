@@ -228,7 +228,10 @@ function multiple($value,array $options){
  * @param array $options
  * @return int
  */
-function multipleToNum(array $options){
+function multipleToNum($options){
+    if(!is_array($options)){
+        return $options;
+    }
     $num = 0;
     foreach($options as $option){
         $num = $num|$option;
