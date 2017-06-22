@@ -115,6 +115,7 @@ trait ResourceController
      */
     public function edit($id = null)
     {
+
         $data['row'] = $this->getOne($id);
         //数据字段映射信息
         $data['maps'] = $this->bindModel()->getFieldsMap();

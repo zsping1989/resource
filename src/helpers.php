@@ -205,7 +205,36 @@ function toLateralKey($data,&$result=[],$k=''){
     }
     return $result;
 }
+/**
+ * 二进制数转多选值
+ * @param $value
+ * @param array $options
+ */
+function multiple($value,array $options){
+    $result = [];
+    $i = 0;
+    foreach($options as $option){
+        $val = pow(2,$i);
+        if($val&$value){
+            $result[] = $val;
+        }
+        $i++;
+    }
+    return $result;
+}
 
+/**
+ * 多选值转二进制数
+ * @param array $options
+ * @return int
+ */
+function multipleToNum(array $options){
+    $num = 0;
+    foreach($options as $option){
+        $num = $num|$option;
+    }
+    return $num;
+}
 
 
 

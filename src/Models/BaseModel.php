@@ -214,9 +214,12 @@ trait BaseModel{
      * 获取字段显示映射信息
      * @return array
      */
-    public function scopeGetFieldsMap(){
+    public function scopeGetFieldsMap($query,$key=''){
         if(!isset($this->fieldsShowMaps)){
             return [];
+        }
+        if($key){
+            return array_get($this->fieldsShowMaps,$key);
         }
         return $this->fieldsShowMaps;
     }

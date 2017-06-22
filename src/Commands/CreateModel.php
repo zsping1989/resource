@@ -108,6 +108,17 @@ class CreateModel extends BaseCreate
         $data['fillable'] = $data['fillable'] ? "'".$data['fillable']."'":'';
         $data['delete'] = $data['delete']->implode("','");
         $data['delete'] = $data['delete'] ? "'".$data['delete']."'":'';
+        $data['fieldsShowMaps'] = collect($table_fields)->filter(function ($item) {
+            return in_array($item['showType'], ['radio', 'checkbox']);
+        })->keyBy('Field')->map(function ($item, $key) {
+            $res = '"' . $key . '"' . '=>[' . collect($item['values'])->map(function ($value, $key) {
+                    return '"' . $key . '"' . '=>"' . $value . '"';
+                })->implode(',') . ']';
+            return $res;
+        })->implode(',');
+        $data['checkboxs'] = collect($table_fields)->filter(function ($item) {
+            return in_array($item['showType'], ['checkbox']);
+        });
         $this->datas = $data;
     }
 }
