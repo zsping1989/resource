@@ -30,7 +30,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
         $factory->macro('returns', function ($value=[],$status=200,$view=null) use ($factory,$macro) {
             //需要注册全局数据
             if(!(Request::input('callback') || in_array(Request::input('define'),['AMD','CMD']) ||
-                Request::has('dd') || (Request::ajax() || Request::wantsJson() /*|| Request::has('json')*/) ||
+                Request::has('dd') || (Request::ajax() || Request::wantsJson() || Request::has('json')) ||
                 Request::has('script'))){
                 GlobalData::setPageData();
             }
