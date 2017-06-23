@@ -224,6 +224,18 @@ trait BaseModel{
         return $this->fieldsShowMaps;
     }
 
+    /**
+     * 获取字段默认值
+     * @return array
+     */
+    public function scopeGetFieldsDefault($query){
+        if(!isset($this->fieldsDefault)){
+            return [];
+        }
+        return $this->fieldsDefault;
+    }
+
+
 
 
 

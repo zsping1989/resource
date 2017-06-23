@@ -111,14 +111,26 @@ class CreateModel extends BaseCreate
         $data['fieldsShowMaps'] = collect($table_fields)->filter(function ($item) {
             return in_array($item['showType'], ['radio', 'checkbox','select']);
         })->keyBy('Field')->map(function ($item, $key) {
-            $res = '"' . $key . '"' . '=>[' . collect($item['values'])->map(function ($value, $key) {
-                    return '"' . $key . '"' . '=>"' . $value . '"';
+            $res = "'" . $key . "'"  . '=>[' . collect($item['values'])->map(function ($value, $key) {
+                    return '"' . $key . '"' . "=>'" . $value . "'";
                 })->implode(',') . ']';
             return $res;
         })->implode(',');
         $data['checkboxs'] = collect($table_fields)->filter(function ($item) {
             return in_array($item['showType'], ['checkbox']);
         });
+        $data['fieldsDefault'] = collect($table_fields)->filter(function($item){
+            return !in_array($item['Field'],['id','deleted_at','updated_at','created_at']) && !is_null($item['Default']);
+        })->map(function($item){
+            if(is_bool($item['Default'])){
+                $value = $item['Default'] ? 'true':'false';
+            }elseif(is_numeric($item['Default'])){
+                $value = $item['Default'];
+            }else{
+                $value = "'".$item['Default']."'";
+            };
+            return "'".$item['Field']."' => ".$value;
+        })->implode(',');
         $this->datas = $data;
     }
 }

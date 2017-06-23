@@ -84,18 +84,13 @@ class ResourceMacroServiceProvider extends ServiceProvider
             ]);
         }
 
-        //去掉为空数据
+      /*  //去掉为空数据
         $rquestObj = app('request');
-        $rquest = collect($rquestObj->except(['order','where']))->filter(function($item,$key)use($rquestObj){
-            if(is_null($item)){
-                $rquestObj->offsetUnset($key);
-            }
-            return !is_null($item);
-        })->toArray();
+        $rquest = collect($rquestObj->except(['order','where']))->toArray();
         //处理关系模型数据
         collect(getRelationData($rquest))->map(function($item,$key)use($rquestObj){
             $rquestObj->offsetSet($key,$item);
-        });
+        });*/
 
 
         $this->publishes([

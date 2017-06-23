@@ -115,7 +115,6 @@ trait ResourceController
      */
     public function edit($id = null)
     {
-
         $data['row'] = $this->getOne($id);
         //数据字段映射信息
         $data['maps'] = $this->bindModel()->getFieldsMap();
@@ -188,8 +187,9 @@ trait ResourceController
     {
         $model = $this->modelNamespace . $model_name;
         $model = new $model();
-        return collect(array_flip($model->getFillable()))->map(function ($item) {
-            return null;
+        $default = $model->getFieldsDefault();
+        return collect(array_flip($model->getFillable()))->map(function ($item,$key)use($default) {
+            return array_get($default,$key,null);
         })->toArray() ?: new \stdClass();
     }
 
