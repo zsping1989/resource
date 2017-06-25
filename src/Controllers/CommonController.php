@@ -53,6 +53,12 @@ trait CommonController{
     public $showIndexFields=[];
 
     /**
+     * Index页面字段名称显示多条数据统计值
+     * @var array
+     */
+    public $showIndexFieldsCount=[];
+
+    /**
      * 编辑页面显示字段
      * @var array
      */
@@ -101,6 +107,39 @@ trait CommonController{
      * @return array
      */
     protected function selectWithFields($fields_key='showIndexFields'){
+        $result = [];
+        foreach($this->getWithFields($this->$fields_key) as $key=>$withField){
+            if(is_array($withField) &&  array_get($this->showIndexFieldsCount,$key)){
+                $result[$key] = function($q)use($withField,$key){
+                    $q->select($withField);
+                    $withCount = collect(array_get($this->showIndexFieldsCount,$key))->filter(function($item){
+                        return !is_array($item);
+                    })->toArray();
+                    $q->withCount($withCount);
+                };
+            }elseif(is_array($withField)){
+                $result[$key] = function($q)use($withField){
+                    $q->select($withField);
+                };
+            }elseif(array_get($this->showIndexFieldsCount,$key)) {
+                $result[$key] = function ($q) use ($key) {
+                    $withCount = collect(array_get($this->showIndexFieldsCount,$key))->filter(function($item){
+                        return !is_array($item);
+                    })->toArray();
+                    $q->withCount($withCount);
+                };
+            }else{
+                $result[$key] = $withField;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 查询所需字段
+     * @return array
+     */
+    protected function selectWithEidtFields($fields_key='showIndexFields'){
         $result = [];
         foreach($this->getWithFields($this->$fields_key) as $key=>$withField){
             if(is_array($withField)){

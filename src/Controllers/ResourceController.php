@@ -10,6 +10,7 @@
 namespace Resource\Controllers;
 
 
+use App\Models\Admin;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
@@ -74,6 +75,9 @@ trait ResourceController
     {
         $this->bindModel OR $this->bindModel();
         $obj = $this->bindModel->with($this->selectWithFields())
+            ->withCount(collect($this->showIndexFieldsCount)->filter(function($item,$key){
+                return !is_array($item);
+            })->toArray())
             ->options($this->getOptions());
         return $obj;
     }
@@ -124,7 +128,7 @@ trait ResourceController
     {
         $this->bindModel OR $this->bindModel(); //绑定模型
         return $id ? $this->bindModel
-            ->with($this->selectWithFields('editFields'))->findOrFail($id) :
+            ->with($this->selectWithEidtFields('editFields'))->findOrFail($id) :
             $this->editDefaultFields($this->editFields,$this->bindModel());
     }
 
