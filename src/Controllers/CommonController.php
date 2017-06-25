@@ -52,6 +52,12 @@ trait CommonController{
      */
     public $showIndexFields=[];
 
+    /**
+     * 编辑页面显示字段
+     * @var array
+     */
+    public $editFields = [];
+
 
 
 
@@ -94,9 +100,9 @@ trait CommonController{
      * 查询所需字段
      * @return array
      */
-    protected function selectWithFields(){
+    protected function selectWithFields($fields_key='showIndexFields'){
         $result = [];
-        foreach($this->getWithFields($this->showIndexFields) as $key=>$withField){
+        foreach($this->getWithFields($this->$fields_key) as $key=>$withField){
             if(is_array($withField)){
                 $result[$key] = function($q)use($withField){
                     $q->select($withField);

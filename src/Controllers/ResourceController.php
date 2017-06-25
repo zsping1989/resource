@@ -78,37 +78,7 @@ trait ResourceController
         return $obj;
     }
 
-    /**
-     * excel导出
-     */
-    public function export()
-    {
-        ini_set('memory_limit', -1);
-        Excel::create($this->bindModel()->getTable(), function ($excel) {
-            $excel->sheet('score', function ($sheet) {
-                $keys = toLateralKey($this->showFields);
-                if (!$keys) {
-                    $sheet->rows([]);
-                    return;
-                }
-                $all_titles = $this->relationTables($this->showFields, $this->bindModel());
-                $title = collect($keys)->map(function ($item) use ($all_titles) {
-                    return array_get($all_titles, $item, '');
-                });
-                $data = collect($this->getWithOptionModel()
-                    ->get())
-                    ->map(function ($item) use ($keys) {
-                        $item = $item->toArray();
-                        $row = collect($keys)->map(function ($key) use ($item) {
-                            return array_get($item, $key, '');
-                        });
-                        return $row;
-                    })
-                    ->prepend($title->toArray());
-                $sheet->rows($data->toArray());
-            });
-        })->export('xls');
-    }
+
 
     /**
      * 编辑页面
@@ -123,6 +93,27 @@ trait ResourceController
         return Response::returns($data); //获取一条记录
     }
 
+    /**
+     * 查询所需字段
+     * @return array
+     */
+    protected function editDefaultFields($data,$model){
+        $result = [];
+        $defult = $this->getDefault($model);//默认值
+        $fields = [];
+        foreach($data as $key=>$row){
+            if(is_array($row)){
+                $result[$key] = $this->editDefaultFields($row,$model->$key()->getRelated());
+            }else{
+                $fields[] =  $row;
+            }
+        }
+        $result1 = $fields ? collect($defult)->filter(function($item,$key)use($fields,$model){
+            return in_array($key,array_merge($fields,[$model->getKeyName()]));
+        })->toArray() : $defult;
+        return array_merge($result1,$result);
+    }
+
 
     /**
      * 获取一条编辑数据
@@ -132,10 +123,9 @@ trait ResourceController
     public function getOne($id = null)
     {
         $this->bindModel OR $this->bindModel(); //绑定模型
-        if (!$id) { //没有数据返回空对象
-            return $this->getDefault($this->getResourceModel());
-        }
-        return $this->bindModel->findOrFail($id); //没有数据抛出异常
+        return $id ? $this->bindModel
+            ->with($this->selectWithFields('editFields'))->findOrFail($id) :
+            $this->editDefaultFields($this->editFields,$this->bindModel());
     }
 
 
@@ -183,10 +173,8 @@ trait ResourceController
      * @param $model_name
      * @return \stdClass
      */
-    protected function getDefault($model_name)
+    protected function getDefault($model)
     {
-        $model = $this->modelNamespace . $model_name;
-        $model = new $model();
         $default = $model->getFieldsDefault();
         return collect(array_flip($model->getFillable()))->map(function ($item,$key)use($default) {
             return array_get($default,$key,null);
@@ -269,6 +257,36 @@ trait ResourceController
      * @return mixed
      */
     abstract protected function getValidateRule();
-
+    /**
+     * excel导出
+     */
+    public function export()
+    {
+        ini_set('memory_limit', -1);
+        Excel::create($this->bindModel()->getTable(), function ($excel) {
+            $excel->sheet('score', function ($sheet) {
+                $keys = toLateralKey($this->showFields);
+                if (!$keys) {
+                    $sheet->rows([]);
+                    return;
+                }
+                $all_titles = $this->relationTables($this->showFields, $this->bindModel());
+                $title = collect($keys)->map(function ($item) use ($all_titles) {
+                    return array_get($all_titles, $item, '');
+                });
+                $data = collect($this->getWithOptionModel()
+                    ->get())
+                    ->map(function ($item) use ($keys) {
+                        $item = $item->toArray();
+                        $row = collect($keys)->map(function ($key) use ($item) {
+                            return array_get($item, $key, '');
+                        });
+                        return $row;
+                    })
+                    ->prepend($title->toArray());
+                $sheet->rows($data->toArray());
+            });
+        })->export('xls');
+    }
 
 }
