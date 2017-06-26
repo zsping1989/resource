@@ -109,10 +109,10 @@ trait CommonController{
     protected function selectWithFields($fields_key='showIndexFields'){
         $result = [];
         foreach($this->getWithFields($this->$fields_key) as $key=>$withField){
-            if(is_array($withField) &&  array_get($this->showIndexFieldsCount,$key)){
+            if(is_array($withField) &&  array_get($this->getShowIndexFieldsCount(),$key)){
                 $result[$key] = function($q)use($withField,$key){
                     $q->select($withField);
-                    $withCount = collect(array_get($this->showIndexFieldsCount,$key))->filter(function($item){
+                    $withCount = collect(array_get($this->getShowIndexFieldsCount(),$key))->filter(function($item){
                         return !is_array($item);
                     })->toArray();
                     $q->withCount($withCount);
@@ -121,9 +121,9 @@ trait CommonController{
                 $result[$key] = function($q)use($withField){
                     $q->select($withField);
                 };
-            }elseif(array_get($this->showIndexFieldsCount,$key)) {
+            }elseif(array_get($this->getShowIndexFieldsCount(),$key)) {
                 $result[$key] = function ($q) use ($key) {
-                    $withCount = collect(array_get($this->showIndexFieldsCount,$key))->filter(function($item){
+                    $withCount = collect(array_get($this->getShowIndexFieldsCount(),$key))->filter(function($item){
                         return !is_array($item);
                     })->toArray();
                     $q->withCount($withCount);

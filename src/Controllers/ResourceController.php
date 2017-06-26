@@ -75,7 +75,7 @@ trait ResourceController
     {
         $this->bindModel OR $this->bindModel();
         $obj = $this->bindModel->with($this->selectWithFields())
-            ->withCount(collect($this->showIndexFieldsCount)->filter(function($item,$key){
+            ->withCount(collect($this->getShowIndexFieldsCount())->filter(function($item,$key){
                 return !is_array($item);
             })->toArray())
             ->options($this->getOptions());
@@ -261,6 +261,16 @@ trait ResourceController
      * @return mixed
      */
     abstract protected function getValidateRule();
+
+    protected function getShowIndexFieldsCount(){
+        if($this->showIndexFieldsCount){
+            return $this->showIndexFieldsCount;
+        }
+        return [];
+    }
+
+
+
     /**
      * excel导出
      */
