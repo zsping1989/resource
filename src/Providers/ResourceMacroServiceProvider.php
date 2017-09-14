@@ -53,9 +53,9 @@ class ResourceMacroServiceProvider extends ServiceProvider
                     ->getCompiled()
                     ->getStaticPrefix()))->filter()->values();
                 $blade = $view?:'/layouts/'.$path->first();
-                view()->share('page',$path->forget(0)->map(function($item){
+                view()->share('page',array_get($value,'global.page',$path->forget(0)->map(function($item){
                     return str_replace('-','_',$item);
-                })->implode('-'));
+                })->implode('-')));
                 return view($blade,['data'=>$value]);
             }
             return $factory->make($value,$status);
@@ -83,14 +83,6 @@ class ResourceMacroServiceProvider extends ServiceProvider
                 'Resource\Commands\ExportSeed',
             ]);
         }
-
-      /*  //去掉为空数据
-        $rquestObj = app('request');
-        $rquest = collect($rquestObj->except(['order','where']))->toArray();
-        //处理关系模型数据
-        collect(getRelationData($rquest))->map(function($item,$key)use($rquestObj){
-            $rquestObj->offsetSet($key,$item);
-        });*/
 
 
         $this->publishes([

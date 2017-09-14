@@ -103,7 +103,8 @@ class CreateModel extends BaseCreate
             'left_margin',
             'right_margin',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'id'
         ])->all())->implode("','");
         $data['fillable'] = $data['fillable'] ? "'".$data['fillable']."'":'';
         $data['delete'] = $data['delete']->implode("','");

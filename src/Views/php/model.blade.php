@@ -33,5 +33,33 @@ class {{$name}} extends Model
     protected $hidden = [{!! $delete !!}];
     //日期字段
     protected $dates = [{!! $dates !!}];
+    //字段值map
+    protected $fieldsShowMaps = [{!! $fieldsShowMaps !!}];
+    //字段默认值
+    protected $fieldsDefault = [{!! $fieldsDefault !!}];
+
+@foreach($checkboxs as $key=>$field)
+    /**
+    * 获取多选值
+    * @param $value
+    * @return array
+    */
+    public function {{camel_case('get_'.$field['Field'])}}Attribute($value)
+    {
+        $field = $this->getFieldsMap('{{$field['Field']}}');
+        unset($field[0]);
+        return multiple($value,$field);
+    }
+
+    /**
+    * 设置多选值
+    * @param $value
+    * @return array
+    */
+    public function {{camel_case('set_'.$field['Field'])}}Attribute($value)
+    {
+        $this->attributes['{{$field['Field']}}'] = multipleToNum($value);
+    }
+@endforeach
 
 }

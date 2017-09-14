@@ -7,7 +7,7 @@
  * 自定义辅助函数
  */
 
-function getRessorceRoutes($name, $controller, array $options = []){
+function getRessorceRoutes(array $options = []){
     //控制器默认路由注册
     $methods = collect([
         'index'=>[ //列表页面
@@ -38,26 +38,18 @@ function getRessorceRoutes($name, $controller, array $options = []){
                 'type'=>'post'
             ]
         ],
-        'add'=>[ //添加数据
-            'route'=>'edit',
+        'show'=>[ //查看数据
+            'route'=>'edit/{id?}',
             'method'=>[
                 [
                     'name'=>'edit',
                     'type'=>'get'
-                ],
-                [
-                    'name'=>'postEdit',
-                    'type'=>'post'
                 ]
             ]
         ],
-        'edit'=>[ //编辑数据
-            'route'=>'edit/{id}',
+        'edit'=>[ //编辑或新增数据
+            'route'=>'edit/{id?}',
             'method'=>[
-                [
-                    'name'=>'edit',
-                    'type'=>'get'
-                ],
                 [
                     'name'=>'postEdit',
                     'type'=>'post'
@@ -89,7 +81,7 @@ function getRessorceRoutes($name, $controller, array $options = []){
  */
 function createRessorceRoute($name, $controller, array $options = []){
     //控制器默认路由注册
-    $methods = getRessorceRoutes($name, $controller,$options);
+    $methods = getRessorceRoutes($options);
     //路由注册
     $methods->map(function($item)use($name,$controller){
         $type = array_get($item,'method.type',false);

@@ -11,6 +11,8 @@ namespace Resource\Controllers;
 
 
 use App\Models\Admin;
+use App\Models\OrderProduct;
+use App\User;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +40,7 @@ trait ResourceController
         //查询数据结果
         $data['list'] = $this->getList();
         //数据字段映射信息
-        $data['maps'] = $this->bindModel()->getFieldsMap();
+        $data['maps'] = $this->getFieldsMap($this->showIndexFields,$this->newBindModel());
         //增删改查URL地址
         $data['configUrl'] = $this->getConfigUrl();
         //条件筛选及排序返回
@@ -52,13 +54,17 @@ trait ResourceController
      */
     public function getList()
     {
-        //获取带有筛选条件的对象
-        $obj = $this->getWithOptionModel();
         //指定查询字段
         $fields = $this->selectFields($this->showIndexFields);
-        $fields and $obj->select(in_array($this->bindModel()->getKeyName(),$fields)?$fields:array_merge([$this->bindModel()->getKeyName()],$fields));
+        $fields and $this->bindModel()->select(in_array($this->newBindModel()->getKeyName(),$fields)
+            ? $fields:array_merge([$this->newBindModel()->getKeyName()],$fields));
+
+        //获取带有筛选条件的对象
+        $obj = $this->getWithOptionModel();
+
         //获取分页数据
         $data = $obj->paginate();
+
         //返回响应数据存放,方便操作日志记录
         Data::set('list', $data);
         return $data;
@@ -71,15 +77,25 @@ trait ResourceController
      * 获取条件拼接对象
      * @return mixed
      */
-    public function getWithOptionModel()
+    public function getWithOptionModel($fields_key='showIndexFields')
     {
         $this->bindModel OR $this->bindModel();
-        $obj = $this->bindModel->with($this->selectWithFields())
+        $obj = $this->bindModel->with($this->selectWithFields($fields_key))
             ->withCount(collect($this->getShowIndexFieldsCount())->filter(function($item,$key){
                 return !is_array($item);
             })->toArray())
             ->options($this->getOptions());
         return $obj;
+    }
+
+    public function getFieldsMap($showFields,$model){
+        $res = $model->getFieldsMap();
+        foreach($showFields as $k=>$showField){
+            if(is_array($showField)){
+                $res[$k] = $this->getFieldsMap($showField,$model->$k()->getRelated());
+            }
+        }
+        return $res;
     }
 
 
@@ -91,9 +107,10 @@ trait ResourceController
     {
         $data['row'] = $this->getOne($id);
         //数据字段映射信息
-        $data['maps'] = $this->bindModel()->getFieldsMap();
+        $data['maps'] = $this->getFieldsMap($this->editFields,$this->newBindModel());
         //增删改查URL地址
         $data['configUrl'] = $this->getConfigUrl('edit');
+        //$data['configUrl']['indexUrl'] = '';
         return Response::returns($data); //获取一条记录
     }
 
@@ -129,7 +146,7 @@ trait ResourceController
         $this->bindModel OR $this->bindModel(); //绑定模型
         return $id ? $this->bindModel
             ->with($this->selectWithEidtFields('editFields'))->findOrFail($id) :
-            $this->editDefaultFields($this->editFields,$this->bindModel());
+            $this->editDefaultFields($this->editFields,$this->newBindModel());
     }
 
 
@@ -165,7 +182,9 @@ trait ResourceController
     public function postDestroy()
     {
         $this->bindModel OR $this->bindModel(); //绑定模型
-        $res = $this->bindModel->destroy(Request::input('ids', []));
+        $ids = Request::input('ids', []);
+        $ids = is_array($ids) ?$ids:[$ids];
+        $res = $this->bindModel->whereIn('id',$ids)->delete();
         if ($res === false) {
             return Response::returns(['alert' => alert(['message' => '删除失败!'], 500)]);
         }
@@ -180,7 +199,7 @@ trait ResourceController
     protected function getDefault($model)
     {
         $default = $model->getFieldsDefault();
-        return collect(array_flip($model->getFillable()))->map(function ($item,$key)use($default) {
+        return collect(array_flip(array_merge([$model->getKeyName()],$model->getFillable())))->map(function ($item,$key)use($default) {
             return array_get($default,$key,null);
         })->toArray() ?: new \stdClass();
     }
@@ -194,6 +213,12 @@ trait ResourceController
         return $this->resourceModel ?: str_replace('Controller', '', class_basename(get_class()));
     }
 
+
+    public function newBindModel(){
+        $resourceModel = $this->getModelNamespace() . $this->getResourceModel();
+        return new $resourceModel();
+    }
+
     /**
      * 绑定模型
      * @return mixed
@@ -201,8 +226,7 @@ trait ResourceController
     public function bindModel()
     {
         if (!$this->bindModel) {
-            $resourceModel = $this->getModelNamespace() . $this->getResourceModel();
-            $this->bindModel = new $resourceModel();
+            $this->bindModel = $this->newBindModel();
         }
         return $this->bindModel;
     }
@@ -240,20 +264,25 @@ trait ResourceController
             ->getCompiled()
             ->getStaticPrefix();
         $data = collect([
-            'dataUrl' => 'list', //翻页url
-            'editUrl' => 'edit', //编辑页面
-            'destroyUrl' => 'destroy', //删除url
-            'exportUrl' => 'export', //导出url
-            'backUrl' => 'index' //编辑后返回url
-        ])->map(function ($value) use ($main,$type) {
-            return str_replace($type, $value, $main);
+            'indexUrl' => ['name'=>'index','method'=>1], //编辑后返回url
+            'listUrl' => ['name'=>'list','method'=>1], //翻页url
+            'showUrl' => ['name'=>'edit','method'=>1], //编辑查看页面
+            'exportUrl' => ['name'=>'export','method'=>1], //导出url
+            'destroyUrl' => ['name'=>'destroy','method'=>2], //删除url
+            'editUrl' => ['name'=>'edit','method'=>2] //执行修改或新增数据
+        ])->map(function ($item) use ($main,$type) {
+            $item['path'] = str_replace($type, $item['name'], $main);
+            return $item;
         });
         if ($this->checkPermission) {
-            $data = $data->map(function ($value) {
-                return app('user.logic')->hasPermission($value) ? $value : '';
+            $data = $data->map(function ($item) {
+                $item['path'] = app('user.logic')->hasPermission($item['path'],$item['method']) ? $item['path'] : '';
+                return $item;
             });
         }
-        return $data;
+        return $data->map(function($item){
+            return $item['path'];
+        });
     }
 
     /**
@@ -269,38 +298,122 @@ trait ResourceController
         return [];
     }
 
+    protected function getExportFields($fields,$model){
+        $res = [];
+        $select_fields = $this->selectFields($fields);
+        if(!$select_fields){
+            $res = array_merge([$model->getKeyName()],array_merge($res,$model->getFillable()));
+        }else{
+            $res = in_array($model->getKeyName(),$select_fields)?$select_fields:array_merge([$model->getKeyName()],$select_fields);
+        }
+        foreach($fields as $key=>$field){
+            if(is_array($field)){
+                $res[$key] = $this->getExportFields($field,$model->$key()->getRelated());
+            }
+        }
+        return $res;
+    }
 
 
     /**
-     * excel导出
+     * 导出excel数据表
      */
     public function export()
     {
         ini_set('memory_limit', -1);
-        Excel::create($this->bindModel()->getTable(), function ($excel) {
-            $excel->sheet('score', function ($sheet) {
-                $keys = toLateralKey($this->showFields);
+        ini_set('max_execution_time', '0');
+        $table = $this->newBindModel()->getTable(); //导出表名
+        Excel::create($table, function ($excel)use($table) {
+            $excel->sheet($table, function ($sheet) {
+                $keys = toLateralKey($this->getExportFields($this->exportFields,$this->newBindModel()));
                 if (!$keys) {
                     $sheet->rows([]);
                     return;
                 }
-                $all_titles = $this->relationTables($this->showFields, $this->bindModel());
+                $all_titles = $this->relationTables($this->exportFields, $this->newBindModel());
                 $title = collect($keys)->map(function ($item) use ($all_titles) {
                     return array_get($all_titles, $item, '');
                 });
-                $data = collect($this->getWithOptionModel()
+                $maps = $this->getFieldsMap($this->exportFields,$this->newBindModel());
+                $data = collect($this->getWithOptionModel('exportFields')
                     ->get())
-                    ->map(function ($item) use ($keys) {
+                    ->map(function ($item) use ($keys,$maps) {
                         $item = $item->toArray();
-                        $row = collect($keys)->map(function ($key) use ($item) {
-                            return array_get($item, $key, '');
+                        $row = collect($keys)->map(function ($key) use ($item,$maps) {
+                            $value = array_get($item, $key, '');
+                            $map = array_get($maps,$key);
+                            if($map){
+                                if(!is_array($value)){
+                                    $value = array_get(array_get($maps,$key),$value);
+                                }else{
+                                    $value = collect($value)->map(function($value)use($map){
+                                        return array_get($map,$value);
+                                    })->implode(',');
+                                }
+                            }
+                            return $value;
                         });
                         return $row;
                     })
-                    ->prepend($title->toArray());
-                $sheet->rows($data->toArray());
+                    ->prepend($title->toArray()) //标题
+                    ->prepend($keys); //key
+                $sheet->setAutoSize(true);
+                $sheet->rows($data->toArray(),true);
             });
-        })->export('xls');
+        })->export('xlsx');
+    }
+
+    /**
+     * 验证导入数据
+     */
+    private function verifyImport(&$reader,$table=null){
+        $table = $table ?: $this->newBindModel()->getTable(); //导入表名
+        $verify_table = $reader->sheet(0)->getTitle();
+        if($table!=$verify_table){
+            dd('您选择的EXCEL文件有误,请使用规范模板导入!');
+        }
+    }
+
+    /**
+     * 导入数据
+     */
+    public function import(){
+        ini_set ('memory_limit', -1);
+        ini_set('max_execution_time', '0');
+        //上传excel文件路径
+        if(!app('request')->file('excel')){
+            dd('请先选择EXCEL文件');
+        }
+        $filePath = app('request')->file('excel')->getRealPath();
+        Excel::load($filePath, function($reader){
+            $this->verifyImport($reader);
+            $now = date('Y-m-d H:i:s'); //当前时间
+            $maps = $this->getFieldsMap($this->exportFields,$this->newBindModel());
+            $default = $this->editDefaultFields($this->exportFields,$this->newBindModel());
+            $datas = $reader->all()->forget(0)->filter(function($item){ //过滤全部为空的数据
+                $flog = false;
+                foreach($item as $value){
+                    $value and $flog=true;
+                }
+                return $flog;
+            })->map(function($item)use($maps,$default){
+                return collect($item)->map(function($item,$key)use($maps,$default){
+                    $map = array_get($maps,$key);
+                    if($map){
+                        $value = array_get(array_flip($map),trim($item),array_get($default,$key));
+                    }else{
+                        $value = is_null($item) ? array_get($default,$key) : trim($item);
+                    }
+                    return $value;
+                })->toArray();
+            })->toArray(); //读取数据
+            $key_name = $this->newBindModel()->getKeyName();
+            $bindModel = $this->getModelNamespace() . $this->getResourceModel();
+            foreach($datas as $row){
+                $bindModel::updateOrCreate([$key_name=>array_get($row,$key_name)?:null],$row); //更新,创建数据
+            }
+            dd('处理完成');
+        });
     }
 
 }

@@ -44,7 +44,7 @@ trait CommonController{
      * 获取Index页面的url配置地址
      * @var bool
      */
-    protected $checkPermission = false;
+    protected $checkPermission = true;
 
     /**
      * Index页面字段名称显示
@@ -64,11 +64,11 @@ trait CommonController{
      */
     public $editFields = [];
 
-
-
-
-
-
+    /**
+     * excel导出数据字段
+     * @var array
+     */
+    public $exportFields = [];
 
 
 
@@ -121,7 +121,7 @@ trait CommonController{
                 $result[$key] = function($q)use($withField){
                     $q->select($withField);
                 };
-            }elseif(array_get($this->getShowIndexFieldsCount(),$key)) {
+            }elseif(!is_numeric($key) && array_get($this->getShowIndexFieldsCount(),$key)) {
                 $result[$key] = function ($q) use ($key) {
                     $withCount = collect(array_get($this->getShowIndexFieldsCount(),$key))->filter(function($item){
                         return !is_array($item);
@@ -235,12 +235,15 @@ trait CommonController{
         $options = ['where'=>[],'order'=>[]]; //结果返回
         $input = collect(Request::only(['where','order']));
         $where = []; //输出
+        $sizerDefault = collect($this->sizerDefault);
         //筛选条件全部转成一级
-        collect($this->sizer)->map(function($item,$key)use(&$where,&$options,$input){
+        collect($this->sizer)->map(function($item,$key)use(&$where,&$options,$input,$sizerDefault){
             $inputWhere = collect($input->get('where',[]));
             if(is_array($item)){
+                $inputValue = $inputWhere->get($key);
+                $defaultValue = $sizerDefault->get($key,[]);
                 foreach($item as $k=>$row){
-                    if(($val = collect($inputWhere->get($key))->get($k))!=='' && !is_null($val)){
+                    if(($val = array_get($inputValue,$k,array_get($defaultValue,$k)))!=='' && !is_null($val)){
                         $options['where'][] = [
                             'key'=>$key,
                             'exp'=>$row,
@@ -250,7 +253,7 @@ trait CommonController{
                     $where[$key][$k] = $val?: '';
                 }
             }else{
-                if(($val = $inputWhere->get($key))!=='' && !is_null($val)){
+                if(($val = $inputWhere->get($key,$sizerDefault->get($key)))!=='' && !is_null($val)){
                     $options['where'][] = [
                         'key'=>$key,
                         'exp'=>$item,

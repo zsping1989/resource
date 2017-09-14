@@ -36,7 +36,7 @@ class CreateView extends BaseCreate
         if($this->argument('output')){
             $this->outputPath = resource_path('assets/js/'.$this->argument('output'));
         }else{
-            $this->outputPath = resource_path('assets/js/admin/'.snake_case(basename($this->argument('controller'))).'/'.studly_case($this->argument('template')));
+            $this->outputPath = resource_path('assets/js/admin/'.snake_case(basename($this->argument('controller'))).'/'.snake_case($this->argument('template')));
         }
     }
 
@@ -52,7 +52,7 @@ class CreateView extends BaseCreate
             $controller = 'App\\Http\\Controllers\\'.str_replace('/','\\',$this->argument('controller')).'Controller';
         }
         $controller = new $controller();
-        $this->bindModel = $controller->bindModel(); //绑定模型
+        $this->bindModel = $controller->newBindModel(); //绑定模型
         $data = $this->bindModel->getTableInfo();
         $data['table_fields'] = collect($data['table_fields'])->keyBy('Field')->toArray();
         $data['path'] = str_singular($this->bindModel->getTable());

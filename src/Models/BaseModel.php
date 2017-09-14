@@ -77,9 +77,9 @@ trait BaseModel{
 
             if($exp=='has'){
                 if($val){
-                    $query->whereHas('admin');
+                    $query->whereHas($item['key']);
                 }else{
-                    $query->whereDoesntHave('admin');
+                    $query->whereDoesntHave($item['key']);
                 }
                 return ;
             }
@@ -146,7 +146,9 @@ trait BaseModel{
         if($condition=='or'){
             $exps[] = 'or';
         }
-        if(in_array($exp,$whereMap)){
+        if($exp=='null'){
+            $val ? $query->whereNull($key):$query->whereNotNull($key);
+        }elseif(in_array($exp,$whereMap)){
             $exps[] = 'where';
             $exps[] = $exp;
             $where = camel_case(implode('_',$exps));
@@ -191,7 +193,7 @@ trait BaseModel{
                 $comment = explode('@',$item->Comment);
                 $item->validator = array_get($comment,'1',''); //字段验证
                 $comment = explode('$',$comment[0]);
-                $item->showType = ends_with($item->Field,'_at') ? 'time' : array_get($comment,'1',''); //字段显示类型
+                $item->showType = (!array_get($comment,1) && ends_with($item->Field,'_at')) ? 'time' : array_get($comment,'1',''); //字段显示类型
                 $item->showType = in_array($item->Field,['deleted_at','left_margin','right_margin','level','remember_token']) ? 'hidden' :  $item->showType;
                 $comment = explode(':',$comment[0]);
                 $info = ['created_at'=>'创建时间','updated_at'=>'修改时间'];
@@ -216,12 +218,12 @@ trait BaseModel{
      */
     public function scopeGetFieldsMap($query,$key=''){
         if(!isset($this->fieldsShowMaps)){
-            return [];
+            return collect([]);
         }
         if($key){
-            return array_get($this->fieldsShowMaps,$key);
+            return collect(array_get($this->fieldsShowMaps,$key));
         }
-        return $this->fieldsShowMaps;
+        return collect($this->fieldsShowMaps);
     }
 
     /**
@@ -230,9 +232,9 @@ trait BaseModel{
      */
     public function scopeGetFieldsDefault($query){
         if(!isset($this->fieldsDefault)){
-            return [];
+            return collect([]);
         }
-        return $this->fieldsDefault;
+        return collect($this->fieldsDefault);
     }
 
 

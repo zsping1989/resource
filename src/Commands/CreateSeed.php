@@ -55,7 +55,7 @@ class CreateSeed extends BaseCreate
         $trueTable = $prefix.$this->bindModel->getTable();
         $data['data'] = collect(DB::connection($connection)->select('SELECT * FROM `'.$trueTable.'`'))->map(function($item){
             return collect($item)->toArray();
-        })->toJson();
+        })->toJson(JSON_UNESCAPED_UNICODE);
         $this->datas = $data;
     }
 }
