@@ -90,13 +90,14 @@ class ResourceMacroServiceProvider extends ServiceProvider
             __DIR__.'/../Publishes/database/migrations' => database_path('migrations'),
             __DIR__.'/../Publishes/Services' => app_path('Services'),
             __DIR__.'/../Publishes/configs' => config_path(),
+            __DIR__.'/../Publishes/views/layouts' => base_path('resources/views/layouts'),
             __DIR__.'/../Views' => base_path('resources/views/vendor/zsping1989/resource')
-        ]);
+        ],'resource');
 
         //需要生成的例子
         $this->publishes([
             __DIR__.'/../Publishes/controllers' => app_path('Http/Controllers/Admin')
-        ], 'example');
+        ], 'resource-example');
 
 
     }
