@@ -20,4 +20,25 @@ class Area extends Model
     //日期字段
     protected $dates = ['created_at','updated_at','deleted_at'];
 
+    /**
+     * 字段值map
+     * @var array
+     */
+    protected $fieldsShowMaps = [
+        'status'=>[1=>'显示',2=>'不显示']
+    ];
+
+    /**
+     * 字段默认值
+     * @var array
+     */
+    protected $fieldsDefault = [
+        'name'=>'',
+        'status'=>1,
+        'parent_id'=>0,
+        'level'=>0,
+        'left_margin'=>0,
+        'right_margin'=>0
+    ];
+
 }
