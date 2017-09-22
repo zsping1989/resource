@@ -19,7 +19,9 @@ trait CommonController{
      * 筛选条件
      * @var array
      */
-    protected $sizer = [];
+    protected $sizer = [
+        'id'=>'like'
+    ];
 
     /**
      * 其它筛选条件输出
@@ -37,7 +39,10 @@ trait CommonController{
      * 默认排序
      * @var array
      */
-    protected $orderDefault=[];
+    protected $orderDefault = [
+        'created_at'=>'desc',
+        'id'=>'asc'
+    ];
 
     /**
      * 是否检查用户拥护的url权限

@@ -36,6 +36,23 @@ class {{$name}}Controller extends Controller
     protected function getValidateRule(){
         return [{!! $validates !!}];
     }
-
+@if ($is_tree_model)
+    /**
+     * 编辑页面
+     */
+    public function edit($id = null)
+    {
+        $data['row'] = $this->getOne($id);
+        //数据字段映射信息
+        $data['maps'] = $this->getFieldsMap($this->editFields,$this->newBindModel());
+        //查询可选择的父级角色
+        $data['maps']['optional_parents'] = {{$modelName}}::optionalParent($id ? $data['row'] : null)
+            ->orderBy('left_margin', 'asc')
+            ->get();
+        //增删改查URL地址
+        $data['configUrl'] = $this->getConfigUrl('edit');
+        return Response::returns($data); //获取一条记录
+    }
+@endif
 
 }

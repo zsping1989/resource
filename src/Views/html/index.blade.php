@@ -30,10 +30,6 @@
                             <span v-else-if="key =='{{$key}}'">
                                 @{{ props.item | array_get(key) | str_limit(10,'') }}
                             </span>
-                        @elseif($table_fields[$key]['showType']=='month')
-                            <span v-else-if="key =='{{$key}}'">
-                                @{{ props.item | array_get(key) | str_limit(7,'') }}
-                            </span>
                         @elseif($table_fields[$key]['showType']=='icon')
                             <span v-else-if="key =='{{$key}}'">
                                  <i class="fa" :class="props.item[key]"></i>

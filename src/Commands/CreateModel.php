@@ -128,6 +128,10 @@ class CreateModel extends BaseCreate
         })->map(function($item){
             if(is_bool($item['Default'])){
                 $value = $item['Default'] ? 'true':'false';
+            }elseif(is_numeric($item['Default']) && $item['showType']=='checkbox') {
+                $field = $item['values'];
+                unset($field[0]);
+                $value = '['.implode(',',multiple($item['Default'],$field)).']';
             }elseif(is_numeric($item['Default'])){
                 $value = $item['Default'];
             }else{

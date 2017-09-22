@@ -102,6 +102,7 @@ class CreateController extends BaseCreate
         })->filter(function($item){
             return $item;
         })->implode(",");
+        $data['is_tree_model'] = isset($modelName::$isTreeModel);
         $this->datas = $data;
     }
 }

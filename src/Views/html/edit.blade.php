@@ -50,6 +50,8 @@
                                                         <input v-model="props['row']['{{$table_field['Field']}}']" :value="index" type="radio"  :disabled="!props.config['dataUrl']"> @{{item}}
                                                     </span>
                                                 </div>
+                                            @elseif($table_field['showType']=='parent')
+                                                <ztree v-model="props['row']['{{$table_field['Field']}}']"  :check-enable="false" :multiple="false" :id="'parent'" :chkbox-type='{ "Y" : "", "N" : "" }' :data="maps['optional_parents']"></ztree>
                                             @elseif($table_field['showType']=='email')
                                                 <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}" type="email" class="form-control"  :disabled="!props.config['dataUrl']">
                                             @elseif($table_field['showType']=='password')
@@ -70,10 +72,12 @@
         </div>
     </section>
 </template>
-
 <script>
     export default {
         components: {
+@if(collect($table_fields)->where('showType','parent')->isNotEmpty())
+            "ztree":(resolve) => require(['../../public/Ztree.vue'], resolve) //异步组件
+@endif
         },
         data() {
             var data = this.$store.state;
