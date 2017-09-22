@@ -95,7 +95,7 @@ class CreateModel extends BaseCreate
         $data['dates'] = $data['dates'] ? "'".$data['dates']."'":'';
         //隐藏输出字段
         $data['delete'] = $table_fields->filter(function($item){
-            return $item['showType']=='delete' || in_array($item['Field'],['deleted_at']);
+            return in_array($item['showType'],['delete','password']) || in_array($item['Field'],['deleted_at']);
         })->pluck('Field');
         //批量赋值字段
         $data['fillable'] = $table_fields->pluck('Field')->diff($data['delete']->merge([
