@@ -28,6 +28,11 @@
                                                     <el-date-picker v-model="props['row']['{{$table_field['Field']}}']" @change="props['row']['{{$table_field['Field']}}'] = arguments[0]" placeholder="选择日期" type="date" :clearable="false" :editable="false"  :disabled="!props.config['dataUrl']">
                                                     </el-date-picker>
                                                 </div>
+                                            @elseif($table_field['showType']=='month')
+                                                <div>
+                                                    <el-date-picker v-model="props['row']['{{$table_field['Field']}}']" @change="props['row']['{{$table_field['Field']}}'] = arguments[0]"  format="yyyy-MM-01" placeholder="选择月份" type="month" :clearable="false" :editable="false"  :disabled="!props.config['dataUrl']">
+                                                    </el-date-picker>
+                                                </div>
                                             @elseif($table_field['showType']=='checkbox')
                                                 <div>
                                                     <span v-for="(item,index) in maps['{{$table_field['Field']}}']">

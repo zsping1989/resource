@@ -120,6 +120,9 @@ class CreateModel extends BaseCreate
         $data['checkboxs'] = collect($table_fields)->filter(function ($item) {
             return in_array($item['showType'], ['checkbox']);
         });
+        $data['passwords'] = collect($table_fields)->filter(function ($item) {
+            return in_array($item['showType'], ['password']);
+        });
         $data['fieldsDefault'] = collect($table_fields)->filter(function($item){
             return !in_array($item['Field'],['id','deleted_at','updated_at','created_at']) && !is_null($item['Default']);
         })->map(function($item){

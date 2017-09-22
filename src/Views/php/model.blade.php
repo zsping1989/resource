@@ -40,25 +40,37 @@ class {{$name}} extends Model
 
 @foreach($checkboxs as $key=>$field)
     /**
-    * 获取多选值
-    * @param $value
-    * @return array
-    */
+     * 获取多选值
+     * @param $value
+     * @return array
+     */
     public function {{camel_case('get_'.$field['Field'])}}Attribute($value)
     {
-        $field = $this->getFieldsMap('{{$field['Field']}}');
+        $field = $this->getFieldsMap('{{$field['Field']}}')->toArray();
         unset($field[0]);
         return multiple($value,$field);
     }
 
     /**
-    * 设置多选值
-    * @param $value
-    * @return array
-    */
+     * 设置多选值
+     * @param $value
+     * @return array
+     */
     public function {{camel_case('set_'.$field['Field'])}}Attribute($value)
     {
         $this->attributes['{{$field['Field']}}'] = multipleToNum($value);
+    }
+@endforeach
+
+@foreach($passwords as $key=>$field)
+    /**
+     * 设置密码
+     * @param  $value
+     * @return  array
+     */
+    public function {{camel_case('set_'.$field['Field'])}}Attribute($value)
+    {
+        $this->attributes['{{$field['Field']}}'] = bcrypt($value);
     }
 @endforeach
 
