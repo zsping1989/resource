@@ -50,10 +50,15 @@
                                                         <input v-model="props['row']['{{$table_field['Field']}}']" :value="index" type="radio"  :disabled="!props.config['dataUrl']"> @{{item}}
                                                     </span>
                                                 </div>
-                                            @elseif($table_field['showType']=='parent')
+                                            @elseif($table_field['showType']=='ztree')
                                                 <ztree v-model="props['row']['{{$table_field['Field']}}']"  :check-enable="false" :multiple="false" :id="'parent'" :chkbox-type='{ "Y" : "", "N" : "" }' :data="maps['optional_parents']"></ztree>
                                             @elseif($table_field['showType']=='email')
                                                 <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}" type="email" class="form-control"  :disabled="!props.config['dataUrl']">
+                                            @elseif($table_field['showType']=='ueditor')
+                                                <ueditor v-model="props['row']['{{$table_field['Field']}}']" id="{{$table_field['Field']}}" :disabled="!props.config['dataUrl']"></ueditor>
+                                            @elseif($table_field['showType']=='select2')
+                                                <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{$path}}/search'" :keyword-key="'name'" :is-ajax="true" >
+                                                </select2>
                                             @elseif($table_field['showType']=='password')
                                                 <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}"  type="password" class="form-control"  :disabled="!props.config['dataUrl']">
                                             @else
@@ -75,8 +80,14 @@
 <script>
     export default {
         components: {
-@if(collect($table_fields)->where('showType','parent')->isNotEmpty())
-            "ztree":(resolve) => require(['../../public/Ztree.vue'], resolve) //异步组件
+@if(collect($table_fields)->where('showType','ztree')->isNotEmpty())
+            "ztree":(resolve) => require(['../../public/Ztree.vue'], resolve), //树状结构异步组件
+@endif
+@if(collect($table_fields)->where('showType','ueditor')->isNotEmpty())
+            "ueditor":(resolve) => require(['../../public/Ueditor.vue'], resolve), //百度编辑器异步组件
+@endif
+@if(collect($table_fields)->where('showType','select2')->isNotEmpty())
+        "select2":(resolve) => require(['../../public/Select2.vue'], resolve), //异步组件
 @endif
         },
         data() {

@@ -4,6 +4,7 @@ namespace {{$namespace}};
 
 use Resource\Controllers\ResourceController;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Request;
 @if ($model_namespace)
 use {{$model}};
 @else
@@ -34,6 +35,16 @@ class {{$name}}Controller extends Controller
      * @return array
      */
     protected function getValidateRule(){
+@if ($has_unique)
+        $id = Request::input('id',0);
+@endif
+@foreach ($tableInfo['table_fields'] as $table_field)
+@if ($table_field['showType']=='password')
+        if(!Request::input('{{$table_field['Field']}}')){
+            Request::offsetUnset('{{$table_field['Field']}}');
+        }
+@endif
+@endforeach
         return [{!! $validates !!}];
     }
 @if ($is_tree_model)

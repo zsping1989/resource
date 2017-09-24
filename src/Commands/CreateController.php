@@ -97,12 +97,19 @@ class CreateController extends BaseCreate
         $data['tableInfo'] = $this->getTableInfo($model); //数据表信息
         $data['validates'] = collect($data['tableInfo']['table_fields'])->map(function($item){
             if($item['validator']){
+                if(str_contains($item['validator'],'unique:')){
+                    $item['validator'] = preg_replace ('/unique\:(\w{1,})\,(\w{1,})/', 'unique:$1,$2,\'.\$id.\',id,deleted_at,NULL', $item['validator']);
+                }
                 return "'".$item['Field']."'=>'".$item['validator']."'";
             }
         })->filter(function($item){
             return $item;
         })->implode(",");
         $data['is_tree_model'] = isset($modelName::$isTreeModel);
+        $data['has_unique'] = collect($data['tableInfo']['table_fields'])
+            ->search(function($item, $key){
+                return str_contains($item['validator'],'unique:');
+            });
         $this->datas = $data;
     }
 }
