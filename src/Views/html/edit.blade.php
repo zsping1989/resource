@@ -51,14 +51,27 @@
                                                     </span>
                                                 </div>
                                             @elseif($table_field['showType']=='ztree')
-                                                <ztree v-model="props['row']['{{$table_field['Field']}}']"  :check-enable="false" :multiple="false" :id="'parent'" :chkbox-type='{ "Y" : "", "N" : "" }' :data="maps['optional_parents']"></ztree>
+                                                <ztree v-model="props['row']['{{$table_field['Field']}}']"  :check-enable="false" :multiple="false" :id="'parent'" :chkbox-type='{ "Y" : "", "N" : "" }' :data="maps['optional_parents']"  :disabled="!props.config['dataUrl']"></ztree>
                                             @elseif($table_field['showType']=='email')
                                                 <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}" type="email" class="form-control"  :disabled="!props.config['dataUrl']">
                                             @elseif($table_field['showType']=='ueditor')
                                                 <ueditor v-model="props['row']['{{$table_field['Field']}}']" id="{{$table_field['Field']}}" :disabled="!props.config['dataUrl']"></ueditor>
                                             @elseif($table_field['showType']=='select2')
-                                                <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{$path}}/search'" :keyword-key="'name'" :is-ajax="true" >
+                                                <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{$path}}/list'" :keyword-key="'name'" :show="['name']"  :disabled="!props.config['dataUrl']" :is-ajax="true" >
                                                 </select2>
+                                            @elseif($table_field['showType']=='color')
+                                                <colorpicker v-model="props['row']['{{$table_field['Field']}}']" :disabled="!props.config['dataUrl']">
+                                                </colorpicker>
+                                            @elseif($table_field['showType']=='timeSelect')
+                                                <div>
+                                                    <el-time-select v-model="props['row']['{{$table_field['Field']}}']" :picker-options="{start: '00:00',step: '00:30',end: '23:30'}" :disabled="!props.config['dataUrl']" placeholder="选择时间">
+                                                    </el-time-select>
+                                                </div>
+                                            @elseif($table_field['showType']=='timePicker')
+                                                <div>
+                                                    <el-time-picker v-model="props['row']['{{$table_field['Field']}}']" :picker-options="{selectableRange: '00:00:00 - 23:59:59'}" :disabled="!props.config['dataUrl']" placeholder="选择时间点">
+                                                    </el-time-picker>
+                                                </div>
                                             @elseif($table_field['showType']=='password')
                                                 <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}"  type="password" class="form-control"  :disabled="!props.config['dataUrl']">
                                             @else
@@ -87,7 +100,16 @@
             "ueditor":(resolve) => require(['../../public/Ueditor.vue'], resolve), //百度编辑器异步组件
 @endif
 @if(collect($table_fields)->where('showType','select2')->isNotEmpty())
-        "select2":(resolve) => require(['../../public/Select2.vue'], resolve), //异步组件
+            "select2":(resolve) => require(['../../public/Select2.vue'], resolve), //选择框异步组件
+@endif
+@if(collect($table_fields)->where('showType','color')->isNotEmpty())
+            "colorpicker":(resolve) => require(['../../public/Colorpicker.vue'], resolve), //颜色选择器异步组件
+@endif
+@if(collect($table_fields)->where('showType','timeSelect')->isNotEmpty())
+           "el-time-select":(resolve) => require(['element-ui/lib/time-select'], resolve), //时间选择器异步组件
+@endif
+@if(collect($table_fields)->where('showType','timePicker')->isNotEmpty())
+            "el-time-picker":(resolve) => require(['element-ui/lib/time-picker'], resolve), //时间点选择器异步组件
 @endif
         },
         data() {

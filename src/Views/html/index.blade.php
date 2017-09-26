@@ -34,6 +34,10 @@
                             <span v-else-if="key =='{{$key}}'">
                                  <i class="fa" :class="props.item[key]"></i>
                              </span>
+                        @elseif($table_fields[$key]['showType']=='color')
+                            <span v-else-if="key =='{{$key}}'">
+                                 <i class="fa fa-square" :style="{color:props.item[key]}"></i>
+                             </span>
                         @endif
                     @endforeach
                     <span v-else-if="key.indexOf('.')!=-1">

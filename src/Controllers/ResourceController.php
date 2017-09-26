@@ -416,4 +416,13 @@ trait ResourceController
         });
     }
 
+    protected function select2Map($row,$key){
+        if(!array_get($row,$key) || !array_get($row,'id')){
+            return [];
+        }
+        return [
+            array_get($row,$key)
+        ];
+    }
+
 }

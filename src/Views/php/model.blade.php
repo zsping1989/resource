@@ -5,27 +5,42 @@
 namespace {{$namespace}};
 use Resource\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
-@if ($tree)
+@if (in_array('treeModel',$table_types))
 use MarginTree\TreeModel;
 @endif
-@if ($softDeletes)
+@if (in_array('softDeletes',$table_types))
 use Illuminate\Database\Eloquent\SoftDeletes;
+@endif
+@if (in_array('excludeTop',$table_types))
+use MarginTree\ExcludeTop;
 @endif
 
 class {{$name}} extends Model
 {
 
     use BaseModel; //基础模型
-@if ($tree)
+@if (in_array('treeModel',$table_types))
     use TreeModel; //树状结构
 @endif
-@if ($softDeletes)
+@if (in_array('softDeletes',$table_types))
     use SoftDeletes; //软删除
 @endif
-
-    protected $table = '{{$table}}'; //数据表名称
+@if (in_array('excludeTop',$table_types))
+    use ExcludeTop; //排除根节点
+@endif
+    //数据表名称
+    protected $table = '{{$table}}';
 @if($connection)
-    protected $connection = '{{$connection}}'; //数据库连接
+    //数据库连接
+    protected $connection = '{{$connection}}';
+@endif
+@if(!in_array('timestamps',$table_types))
+    //无需更新时间字段
+    public $timestamps = false;
+@endif
+@if(in_array('noId',$table_types))
+    //没有主键ID
+    protected $primaryKey = '';
 @endif
     //批量赋值白名单
     protected $fillable = [{!! $fillable !!}];
@@ -74,4 +89,13 @@ class {{$name}} extends Model
     }
 @endforeach
 
+@foreach($table_relations as $table_relation)
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\{{studly_case($table_relation['relation'])}}
+     */
+    public function {{$table_relation['name']}}(){
+        return $this->{{$table_relation['relation']}}('App\Models\{{$table_relation['model']}}');
+    }
+
+@endforeach
 }

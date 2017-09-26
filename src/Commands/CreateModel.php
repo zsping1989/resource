@@ -13,9 +13,7 @@ class CreateModel extends BaseCreate
      * @var string
      */
     protected $signature = 'create:model {table : The name of model}
-    {--connection}
-    {--tree}
-    {--softDeletes}';
+    {--connection}';
 
     /**
      * The console command description.
@@ -42,11 +40,30 @@ class CreateModel extends BaseCreate
         $trueTable = $prefix.$table;
 
         //数据表备注信息
-        $data['table_comment'] =  DB::connection($connection)->select('SELECT TABLE_COMMENT FROM information_schema.`TABLES` WHERE TABLE_SCHEMA= :db_name AND TABLE_NAME = :tname',
+        $data['comment'] =  DB::connection($connection)->select('SELECT TABLE_COMMENT FROM information_schema.`TABLES` WHERE TABLE_SCHEMA= :db_name AND TABLE_NAME = :tname',
             [
                 'db_name'=>config('database.connections.'.$connection.'.database'),
                 'tname'=>$trueTable
             ])[0]->TABLE_COMMENT;
+        //数据表类型
+        preg_match('/\$([A-Za-z0-9_,]{1,})/',$data['comment'],$table_types);
+        $data['table_types'] = collect(explode(',',array_get($table_types,1)))->map(function($item){
+            return camel_case($item);
+        })->toArray();
+        //数据表关系
+        preg_match('/\@([A-Za-z0-9_:|,]{1,})/',$data['comment'],$table_relations);
+        $data['table_relations'] = collect(explode('|',array_get($table_relations,1)))->map(function($item){
+            $item_array = explode(':',$item);
+            $relation = lcfirst(camel_case($item_array[0]));
+            return [
+                'name'=>in_array($relation,['hasMany','belongsToMany','hasManyThrough','morphMany']) ? str_plural(snake_case($item_array[1])) : snake_case($item_array[1]),
+                'relation'=>$relation,
+                'model'=>studly_case(str_singular($item_array[1]))
+            ];
+        })->toArray();
+        $table_comment = str_replace(array_get($table_types,0,''),'',$data['comment']);
+        $table_comment = str_replace(array_get($table_relations,0,''),'',$table_comment);
+        $data['table_comment'] = $table_comment;
 
         //字段信息
         $data['table_fields'] = collect(DB::connection($connection)->select('show full COLUMNS from `'.$trueTable.'`'))
@@ -79,9 +96,7 @@ class CreateModel extends BaseCreate
     protected function readyDatas(){
         $name = $this->argument('table');
         $data['php'] = '<?php'; //模板代码
-        $data['tree'] = $this->option('tree'); //树状结构
         $data['table'] = $name;
-        $data['softDeletes'] = $this->option('softDeletes'); //软删除
         $data['namespace']  = $this->baseNamespace; //生成代码命名空间
         $data['name'] = studly_case(str_singular($name)); //模型名称
         $connection = $this->option('connection') ?: config('database.default');
@@ -89,6 +104,9 @@ class CreateModel extends BaseCreate
         $data['tableInfo'] = $this->getTableInfo($name,$connection); //数据表信息
         $table_fields = collect($data['tableInfo']['table_fields']);
         $data['table_comment'] = $data['tableInfo']['table_comment'];
+        $data['table_relations'] = $data['tableInfo']['table_relations'];
+        $data['table_types'] = $data['tableInfo']['table_types'];
+        $data['comment'] = $data['tableInfo']['comment'];
         $data['dates'] = $table_fields->filter(function($item){
             return $item['showType']=='time' || in_array($item['Field'],['deleted_at', 'created_at','updated_at']);
         })->pluck('Field')->implode("','");
