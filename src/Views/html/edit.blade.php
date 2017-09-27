@@ -149,6 +149,9 @@
 @if(collect($table_fields)->where('showType','num')->isNotEmpty())
             "el-input-number":function(resolve){require(['element-ui/lib/input-number'], resolve);}, //滑块异步组件
 @endif
+@if(collect($table_fields)->where('showType','upload')->isNotEmpty())
+            "upload":function(resolve){require(['../../public/Upload.vue'], resolve);}, //滑块异步组件
+@endif
         },
         data() {
             var data = this.$store.state;
