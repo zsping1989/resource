@@ -59,7 +59,7 @@
                                                     @elseif($table_field['showType']=='email')
                                                         <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}" type="email" class="form-control"  :disabled="!props.config['dataUrl']">
                                                     @elseif($table_field['showType']=='ueditor')
-                                                        <ueditor v-model="props['row']['{{$table_field['Field']}}']" id="{{$table_field['Field']}}" :disabled="!props.config['dataUrl']"></ueditor>
+                                                        <ueditor v-model="props['row']['{{$table_field['Field']}}']" id="{{$table_field['Field']}}" :disabled="!props.config['dataUrl']"  :server-url="global['config']['upload_route']"></ueditor>
                                                     @elseif($table_field['showType']=='select2')
                                                         <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{$path}}/list'" :keyword-key="'name'" :show="['name']"  :disabled="!props.config['dataUrl']" :is-ajax="true" >
                                                         </select2>
@@ -95,6 +95,8 @@
                                                         <div>
                                                             <el-input-number  v-model="props['row']['{{$table_field['Field']}}']"  :disabled="!props.config['dataUrl']" :step="1"></el-input-number>
                                                         </div>
+                                                    @elseif($table_field['showType']=='upload')
+                                                        <upload  v-model="props['row']['{{$table_field['Field']}}']"  :disabled="!props.config['dataUrl']" :action="global['config']['upload_route']+'?action=upload-image'"></upload>
                                                     @elseif($table_field['showType']=='password')
                                                         <input v-model="props['row']['{{$table_field['Field']}}']" placeholder="请输入{{$table_field['info']}}"  type="password" class="form-control"  :disabled="!props.config['dataUrl']">
                                                     @else
