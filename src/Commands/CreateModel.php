@@ -47,12 +47,12 @@ class CreateModel extends BaseCreate
             ])[0]->TABLE_COMMENT;
         //数据表类型
         preg_match('/\$([A-Za-z0-9_,]{1,})/',$data['comment'],$table_types);
-        $data['table_types'] = collect(explode(',',array_get($table_types,1)))->map(function($item){
+        $data['table_types'] = collect(explode(',',array_get($table_types,1)))->filter()->map(function($item){
             return camel_case($item);
         })->toArray();
         //数据表关系
         preg_match('/\@([A-Za-z0-9_:|,]{1,})/',$data['comment'],$table_relations);
-        $data['table_relations'] = collect(explode('|',array_get($table_relations,1)))->map(function($item){
+        $data['table_relations'] = collect(explode('|',array_get($table_relations,1)))->filter()->map(function($item){
             $item_array = explode(':',$item);
             $relation = lcfirst(camel_case($item_array[0]));
             return [
