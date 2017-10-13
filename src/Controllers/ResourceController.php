@@ -302,9 +302,9 @@ trait ResourceController
         $res = [];
         $select_fields = $this->selectFields($fields);
         if(!$select_fields){
-            $res = array_merge([$model->getKeyName()],array_merge($res,$model->getFillable()));
+            $res = $model->getKeyName() ? array_merge([$model->getKeyName()],array_merge($res,$model->getFillable())) : array_merge($res,$model->getFillable());
         }else{
-            $res = in_array($model->getKeyName(),$select_fields)?$select_fields:array_merge([$model->getKeyName()],$select_fields);
+            $res = (in_array($model->getKeyName(),$select_fields)||!$model->getKeyName())?$select_fields:array_merge([$model->getKeyName()],$select_fields);
         }
         foreach($fields as $key=>$field){
             if(is_array($field)){
