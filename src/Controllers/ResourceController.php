@@ -274,7 +274,7 @@ trait ResourceController
             $item['path'] = str_replace($type, $item['name'], $main);
             return $item;
         });
-        if ($this->checkPermission  && app()->has('user.logic')) {
+        if ($this->checkPermission  && array_get(app(),'user.logic')) {
             $data = $data->map(function ($item) {
                 $item['path'] = app('user.logic')->hasPermission($item['path'],$item['method']) ? $item['path'] : '';
                 return $item;
