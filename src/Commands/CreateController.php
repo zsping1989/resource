@@ -45,11 +45,30 @@ class CreateController extends BaseCreate
         $trueTable = $prefix.$tableModel->getTable();
 
         //数据表备注信息
-        $data['table_comment'] =  DB::connection($connection)->select('SELECT TABLE_COMMENT FROM information_schema.`TABLES` WHERE TABLE_SCHEMA= :db_name AND TABLE_NAME = :tname',
+        $data['comment'] =  DB::connection($connection)->select('SELECT TABLE_COMMENT FROM information_schema.`TABLES` WHERE TABLE_SCHEMA= :db_name AND TABLE_NAME = :tname',
             [
                 'db_name'=>config('database.connections.'.$connection.'.database'),
                 'tname'=>$trueTable
             ])[0]->TABLE_COMMENT;
+        //数据表类型
+        preg_match('/\$([A-Za-z0-9_,]{1,})/',$data['comment'],$table_types);
+        $data['table_types'] = collect(explode(',',array_get($table_types,1)))->filter()->map(function($item){
+            return camel_case($item);
+        })->toArray();
+        //数据表关系
+        preg_match('/\@([A-Za-z0-9_:|,]{1,})/',$data['comment'],$table_relations);
+        $data['table_relations'] = collect(explode('|',array_get($table_relations,1)))->filter()->map(function($item){
+            $item_array = explode(':',$item);
+            $relation = lcfirst(camel_case($item_array[0]));
+            return [
+                'name'=>in_array($relation,['hasMany','belongsToMany','hasManyThrough','morphMany']) ? str_plural(snake_case($item_array[1])) : snake_case($item_array[1]),
+                'relation'=>$relation,
+                'model'=>studly_case(str_singular($item_array[1]))
+            ];
+        })->toArray();
+        $table_comment = str_replace(array_get($table_types,0,''),'',$data['comment']);
+        $table_comment = str_replace(array_get($table_relations,0,''),'',$table_comment);
+        $data['table_comment'] = $table_comment;
 
         //字段信息
         $data['table_fields'] = collect(DB::connection($connection)->select('show full COLUMNS from `'.$trueTable.'`'))

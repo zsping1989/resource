@@ -232,6 +232,17 @@ function multipleToNum($options){
 }
 
 
+/**
+ * 关系可选项
+ * @param $row
+ * @param $key
+ * @return array
+ */
+function mapOption($row,$key){
+    $relation_key = str_replace('_id','',$key);
+    return ($row['id'] && array_get($row,$relation_key))? [array_get($row,$relation_key)] : [];
+}
+
 
 
 

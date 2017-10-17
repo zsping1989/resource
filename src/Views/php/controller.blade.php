@@ -47,7 +47,7 @@ class {{$name}}Controller extends Controller
 @endforeach
         return [{!! $validates !!}];
     }
-@if ($is_tree_model)
+
     /**
      * 编辑页面
      */
@@ -56,14 +56,22 @@ class {{$name}}Controller extends Controller
         $data['row'] = $this->getOne($id);
         //数据字段映射信息
         $data['maps'] = $this->getFieldsMap($this->editFields,$this->newBindModel());
+@if ($is_tree_model)
         //查询可选择的父级角色
         $data['maps']['optional_parents'] = {{$modelName}}::optionalParent($id ? $data['row'] : null)
             ->orderBy('left_margin', 'asc')
             ->get();
+@endif
+@foreach ($tableInfo['table_relations'] as $table_relation)
+    @if ($table_relation['relation']=='belongsTo')
+    $data['maps']['{{$table_relation['name']}}_id'] = mapOption($data['row'],'{{$table_relation['name']}}_id');
+    @endif
+@endforeach
+
         //增删改查URL地址
         $data['configUrl'] = $this->getConfigUrl('edit');
         return Response::returns($data); //获取一条记录
     }
-@endif
+
 
 }
