@@ -61,7 +61,7 @@
                                                     @elseif($table_field['showType']=='ueditor')
                                                         <ueditor v-model="props['row']['{{$table_field['Field']}}']" id="{{$table_field['Field']}}" :disabled="!props.config['dataUrl']"  :server-url="global['config']['upload_route']"></ueditor>
                                                     @elseif($table_field['showType']=='select2')
-                                                        <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{str_repeat('_','-',str_repeat('_id','',$table_field['Field']))}}/list'" :keyword-key="'name'" :show="['name']"  :disabled="!props.config['dataUrl']" :is-ajax="true" >
+                                                        <select2 v-model="props['row']['{{$table_field['Field']}}']" :default-options="maps['{{$table_field['Field']}}']"  :url="'/admin/{{str_replace('_','-',str_replace('_id','',$table_field['Field']))}}/list'" :keyword-key="'name'" :show="['name']"  :disabled="!props.config['dataUrl']" :is-ajax="true" >
                                                         </select2>
                                                     @elseif($table_field['showType']=='color')
                                                         <colorpicker v-model="props['row']['{{$table_field['Field']}}']" :disabled="!props.config['dataUrl']">
