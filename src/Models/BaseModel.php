@@ -21,7 +21,7 @@ trait BaseModel{
             return false;
         }
         //表名
-        $table = config('database.connections.'.$this->getConnectionName().'.prefix').$this->getTable();
+        $table = config('database.connections.'.($this->getConnectionName()?:config('database.default')).'.prefix').$this->getTable();
         //sql数据占位符
         $value = [];
         //字段名
@@ -44,7 +44,7 @@ trait BaseModel{
                 });
             });
             $sql .= implode(',',$values_sql);
-            return DB::connection($this->getConnectionName())->insert($sql,$values);
+            return DB::connection($this->getConnectionName()?:config('database.default'))->insert($sql,$values);
         });
         return true;
 
