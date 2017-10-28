@@ -15,7 +15,7 @@ class ExportModel extends Command
      * @var string
      */
     protected $signature = 'export:model
-    {--connection}';
+    {--connection=}';
 
     /**
      * The console command description.

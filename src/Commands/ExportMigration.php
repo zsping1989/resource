@@ -15,7 +15,7 @@ class ExportMigration extends Command
      * @var string
      */
     protected $signature = 'export:migration
-    {--connection}';
+    {--connection=}';
 
     /**
      * The console command description.

@@ -15,7 +15,7 @@ class ExportSeed extends Command
      * @var string
      */
     protected $signature = 'export:seed
-    {--connection}';
+    {--connection=}';
 
     /**
      * The console command description.
