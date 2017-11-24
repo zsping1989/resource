@@ -21,7 +21,7 @@ class {{$name}}Controller extends Controller
      * 模型命名空间
      * @var string
      */
-    protected $modelNamespace = '{{$model_namespace}}';
+    protected $modelNamespace = '\\{{$model_namespace}}';
 @endif
 
     /**
@@ -58,7 +58,7 @@ class {{$name}}Controller extends Controller
         $data['maps'] = $this->getFieldsMap($this->editFields,$this->newBindModel());
 @if ($is_tree_model)
         //查询可选择的父级角色
-        $data['maps']['optional_parents'] = {{$modelName}}::optionalParent($id ? $data['row'] : null)
+        $data['maps']['optional_parents'] = \{{$modelName}}::optionalParent($id ? $data['row'] : null)
             ->orderBy('left_margin', 'asc')
             ->get();
 @endif

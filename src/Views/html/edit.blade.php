@@ -120,16 +120,16 @@
     export default {
         components: {
 @if(collect($table_fields)->where('showType','ztree')->isNotEmpty())
-            "ztree":function(resolve){require(['../../public/Ztree.vue'], resolve);}, //树状结构异步组件
+            "ztree":function(resolve){require(['public/Ztree.vue'], resolve);}, //树状结构异步组件
 @endif
 @if(collect($table_fields)->where('showType','ueditor')->isNotEmpty())
-            "ueditor":function(resolve){require(['../../public/Ueditor.vue'], resolve);}, //百度编辑器异步组件
+            "ueditor":function(resolve){require(['public/Ueditor.vue'], resolve);}, //百度编辑器异步组件
 @endif
 @if(collect($table_fields)->where('showType','select2')->isNotEmpty())
-            "select2":function(resolve){require(['../../public/Select2.vue'], resolve);} , //选择框异步组件
+            "select2":function(resolve){require(['public/Select2.vue'], resolve);} , //选择框异步组件
 @endif
 @if(collect($table_fields)->where('showType','color')->isNotEmpty())
-            "colorpicker":function(resolve){require(['../../public/Colorpicker.vue'], resolve);}, //颜色选择器异步组件
+            "colorpicker":function(resolve){require(['public/Colorpicker.vue'], resolve);}, //颜色选择器异步组件
 @endif
 @if(collect($table_fields)->where('showType','timeSelect')->isNotEmpty())
             "el-time-select":function(resolve){ require(['element-ui/lib/time-select'], resolve);}, //时间选择器异步组件
@@ -150,7 +150,7 @@
             "el-input-number":function(resolve){require(['element-ui/lib/input-number'], resolve);}, //滑块异步组件
 @endif
 @if(collect($table_fields)->where('showType','upload')->isNotEmpty())
-            "upload":function(resolve){require(['../../public/Upload.vue'], resolve);}, //滑块异步组件
+            "upload":function(resolve){require(['public/Upload.vue'], resolve);}, //滑块异步组件
 @endif
         },
         data() {

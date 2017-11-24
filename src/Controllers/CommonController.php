@@ -255,7 +255,7 @@ trait CommonController{
                             'val'=>$val
                         ];
                     }
-                    $where[$key][$k] = $val?: '';
+                    $where[$key][$k] = ($val || $val==='0' || $val===0)?$val: '';
                 }
             }else{
                 if(($val = $inputWhere->get($key,$sizerDefault->get($key)))!=='' && !is_null($val)){
@@ -265,14 +265,20 @@ trait CommonController{
                         'val'=>$val
                     ];
                 }
-                $where[$key] = $val?: '';
+                $where[$key] = ($val || $val==='0' || $val===0)?$val: '';
             }
         });
 
-        $this->otherSizerOutput AND $where = array_merge($this->otherSizerOutput,$where);
+        $this->otherSizerOutput AND $where = array_merge($this->getOtherSizerOutput(),$where);
         $options['order'] = collect($input->get('order',[]))->merge($this->orderDefault)->toArray();
         Condition::set(['where'=>$where,'order'=>$options['order']]);
         return $options;
+    }
+
+    protected function getOtherSizerOutput(){
+        return collect($this->otherSizerOutput)->map(function($item,$key){
+            return Request::input('where.'.$key,$item);
+        })->toArray();
     }
 
 }
