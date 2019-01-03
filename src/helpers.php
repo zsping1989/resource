@@ -124,7 +124,6 @@ function alert($data = [],$status=200){
             'type'=>'success', //消息类型
             'position'=>'top',
             'iconClass'=>'', //图标
-            'position'=>'top', //图标
             'customClass'=>'', //自定义样式
             'duration'=>3000, //显示时间毫秒
             'show'=>true //是否自动弹出
@@ -238,9 +237,9 @@ function multipleToNum($options){
  * @param $key
  * @return array
  */
-function mapOption($row,$key){
+function mapOption($row,$key,$primary_key='id'){
     $relation_key = str_replace('_id','',$key);
-    return ($row['id'] && array_get($row,$relation_key))? [array_get($row,$relation_key)] : [];
+    return ($row[$primary_key] && array_get($row,$relation_key))? [array_get($row,$relation_key)] : [];
 }
 
 

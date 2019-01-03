@@ -11,7 +11,7 @@ namespace Resource\Controllers;
 
 
 use App\Models\Admin;
-use App\Models\OrderProduct;
+use App\Models\Menu;
 use App\User;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -160,6 +160,8 @@ trait ResourceController
         $this->bindModel OR $this->bindModel(); //绑定模型
         $data = $id ? $request->all() : $request->except('id');
         if ($id) {
+            //处理修改时日期字段
+            $data = $this->handDateFields($data,$this->importExcelDateFields);
             $res = $this->bindModel->find($id)->update($data);
             if ($res === false) {
                 return Response::returns(['alert' => alert(['message' => '修改失败!'], 500)]);
@@ -276,7 +278,7 @@ trait ResourceController
         });
         if ($this->checkPermission  && array_get(app(),'user.logic')) {
             $data = $data->map(function ($item) {
-                $item['path'] = app('user.logic')->hasPermission($item['path'],$item['method']) ? $item['path'] : '';
+                $item['path'] = Menu::hasPermission($item['path'],$item['method'])  ? $item['path'] : '';
                 return $item;
             });
         }
@@ -398,6 +400,10 @@ trait ResourceController
                 return $flog;
             })->map(function($item)use($maps,$default){
                 return collect($item)->map(function($item,$key)use($maps,$default){
+                    //日期数据处理
+                    if(in_array($key,isset($this->importExcelDateFields)?$this->importExcelDateFields:[])){
+                        return excelDate($item);
+                    }
                     $map = array_get($maps,$key);
                     if($map){
                         $value = array_get(array_flip($map),trim($item),array_get($default,$key));
@@ -424,5 +430,19 @@ trait ResourceController
             array_get($row,$key)
         ];
     }
+
+    /**
+     * 处理编辑页面的删除日期字段
+     */
+    protected function handDateFields($data,$fields=[]){
+        //处理修改时日期字段
+        collect($fields?:[])->map(function($item)use(&$data){
+            if(!isset($data[$item]) || !$data[$item]){
+                $data[$item] = null;
+            }
+        });
+        return $data;
+    }
+    
 
 }

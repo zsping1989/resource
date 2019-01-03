@@ -27,7 +27,7 @@ class CustomValidator extends Validator{
     public function validateMobilePhone($attribute, $value, $parameters)
     {
         if(!$value) return true;
-        return preg_match("/^1[34578]\\d{9}$/", $value);
+        return preg_match("/^1[3456789]\\d{9}$/", $value);
     }
 
     /**

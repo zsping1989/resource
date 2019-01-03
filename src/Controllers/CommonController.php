@@ -63,6 +63,8 @@ trait CommonController{
      */
     public $showIndexFieldsCount=[];
 
+    protected $importExcelDateFields = [];
+
     /**
      * 编辑页面显示字段
      * @var array

@@ -117,6 +117,9 @@
     </section>
 </template>
 <script>
+    @if(collect($table_fields)->where('showType','num')->isNotEmpty())
+            import inputNumber from 'element-ui/lib/input-number';
+    @endif
     export default {
         components: {
 @if(collect($table_fields)->where('showType','ztree')->isNotEmpty())
@@ -147,7 +150,7 @@
             "el-rate":function(resolve){require(['element-ui/lib/rate'], resolve);}, //滑块异步组件
 @endif
 @if(collect($table_fields)->where('showType','num')->isNotEmpty())
-            "el-input-number":function(resolve){require(['element-ui/lib/input-number'], resolve);}, //滑块异步组件
+            "el-input-number":inputNumber, 
 @endif
 @if(collect($table_fields)->where('showType','upload')->isNotEmpty())
             "upload":function(resolve){require(['public/Upload.vue'], resolve);}, //滑块异步组件

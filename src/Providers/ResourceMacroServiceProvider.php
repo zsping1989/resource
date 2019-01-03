@@ -31,7 +31,7 @@ class ResourceMacroServiceProvider extends ServiceProvider
             //需要注册全局数据
             if(!(Request::input('callback') || in_array(Request::input('define'),['AMD','CMD']) ||
                 Request::has('dd') || (Request::ajax() || Request::wantsJson() || Request::has('json')) ||
-                Request::has('script'))){
+                Request::has('script')) || Request::has('global')){
                 GlobalData::setPageData();
             }
             Data::set(collect($value)->toArray());

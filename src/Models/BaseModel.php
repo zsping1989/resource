@@ -257,6 +257,13 @@ trait BaseModel{
     }
 
 
+    /**
+     * 获取本模型数据库连接对象
+     * @return mixed
+     */
+    public function scopeGetTableName(){
+        return $this->getConnection()->getTablePrefix().$this->getTable();
+    }
 
 
 
